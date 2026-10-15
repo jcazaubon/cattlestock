@@ -88,13 +88,23 @@ public class AltaController {
 
     // --- Fragmentos HTMX ---
 
-    @GetMapping("/alta/categorias")
-    public String categorias(@RequestParam(required = false) String establecimiento,
-                             @RequestParam(required = false) String categoria,
-                             Model model) {
-        model.addAttribute("categorias", categoriasVisibles(establecimiento));
+    /** Al cambiar el origen se rehacen categorias, tipo y campos: el destino nunca ofrece el origen. */
+    @GetMapping("/alta/origen")
+    public String origen(@RequestParam(required = false) String establecimiento,
+                         @RequestParam(required = false) String tipo,
+                         @RequestParam(required = false) String categoria,
+                         @RequestParam(required = false) String destinoEstablecimiento,
+                         @RequestParam(required = false) String destinoCategoria,
+                         Model model) {
+        model.addAttribute("establecimiento", s(establecimiento));
+        model.addAttribute("tipo", tipo);
         model.addAttribute("categoria", s(categoria));
-        return "fragment/categorias";
+        model.addAttribute("destinoEstablecimiento", s(destinoEstablecimiento));
+        model.addAttribute("destinoCategoria", s(destinoCategoria));
+        model.addAttribute("establecimientos", currentUser.establecimientos());
+        model.addAttribute("categorias", categoriasVisibles(establecimiento));
+        model.addAttribute("destinoCategorias", categoriasDe(destinoEstablecimiento));
+        return "fragment/origen";
     }
 
     @GetMapping("/alta/destino-categorias")

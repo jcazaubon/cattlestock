@@ -37,9 +37,10 @@
                 </label>
             </p>
             <p>
-                <label>Establecimiento<br>
+                <label>Establecimiento de origen<br>
                     <select name="establecimiento" required
-                            hx-get="/alta/categorias" hx-target="#categorias" hx-include="this">
+                            hx-get="/alta/origen" hx-target="#segun-origen"
+                            hx-include="[name='tipo'], [name='categoria'], [name='destinoEstablecimiento'], [name='destinoCategoria'], this">
                         <option value=""></option>
                         @for (var est : establecimientos)
                             <option value="${est.getCode()}" selected="${est.getCode().equals(establecimiento)}">${est.getName()}</option>
@@ -47,27 +48,8 @@
                     </select>
                 </label>
             </p>
-            <p id="categorias">
-                @template.fragment.categorias(categorias = categorias, categoria = categoria)
-            </p>
-            <p>
-                <label>Tipo<br>
-                    <select name="tipo" required
-                            hx-get="/alta/campos" hx-target="#campos"
-                            hx-include="[name='establecimiento'], [name='categoria'], [name='destinoEstablecimiento'], this">
-                        <option value=""></option>
-                        <option value="COMPRA" selected="${"COMPRA".equals(tipo)}">Compra</option>
-                        <option value="VENTA" selected="${"VENTA".equals(tipo)}">Venta</option>
-                        <option value="NACIMIENTO" selected="${"NACIMIENTO".equals(tipo)}">Nacimiento o produccion</option>
-                        <option value="MORTANDAD" selected="${"MORTANDAD".equals(tipo)}">Mortandad</option>
-                        <option value="CONSUMO" selected="${"CONSUMO".equals(tipo)}">Consumo</option>
-                        <option value="TRASLADO" selected="${"TRASLADO".equals(tipo)}">Traslado</option>
-                        <option value="CAMBIO_CATEGORIA" selected="${"CAMBIO_CATEGORIA".equals(tipo)}">Cambio de categoria</option>
-                    </select>
-                </label>
-            </p>
-            <div id="campos">
-                @template.fragment.campos(tipo = tipo, establecimiento = establecimiento, categoria = categoria,
+            <div id="segun-origen">
+                @template.fragment.origen(establecimiento = establecimiento, categoria = categoria, tipo = tipo,
                         destinoEstablecimiento = destinoEstablecimiento, destinoCategoria = destinoCategoria,
                         establecimientos = establecimientos, categorias = categorias, destinoCategorias = destinoCategorias)
             </div>

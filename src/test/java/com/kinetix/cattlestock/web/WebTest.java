@@ -50,6 +50,9 @@ class WebTest {
         service.createCategory("P", "toroseng", "Toros Engorde", Species.VACUNOS);
         service.setOpening("P", "toros", 51);
         service.setOpening("P", "toroseng", 0);
+        service.createEstablishment("LM", "La Marta");
+        service.createCategory("LM", "vacas", "Vacas", Species.VACUNOS);
+        service.setOpening("LM", "vacas", 5);
         userService.crear("admin", "admin", UserEntity.Role.ADMIN, java.util.List.of());
     }
 
@@ -139,12 +142,31 @@ class WebTest {
     }
 
     @Test
-    void elFragmentoDeCategoriasRespondeSoloConElSelect() throws Exception {
+    void alCambiarElOrigenElDestinoNuncaOfreceElOrigen() throws Exception {
         configurar();
-        mockMvc.perform(get("/alta/categorias").param("establecimiento", "P"))
+        mockMvc.perform(get("/alta/origen")
+                        .param("establecimiento", "P")
+                        .param("tipo", "TRASLADO"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Toros")))
-                .andExpect(content().string(containsString("<select name=\"categoria\"")));
+                .andExpect(content().string(containsString("name=\"destinoEstablecimiento\"")))
+                .andExpect(content().string(containsString("La Marta")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(containsString("value=\"P\""))));
+    }
+
+    @Test
+    void unTrasladoAlMismoEstablecimientoSeRechazaConMensaje() throws Exception {
+        configurar();
+        mockMvc.perform(post("/movimientos").with(csrf())
+                        .param("fecha", "2026-09-03")
+                        .param("tipo", "TRASLADO")
+                        .param("establecimiento", "P")
+                        .param("categoria", "toros")
+                        .param("destinoEstablecimiento", "P")
+                        .param("destinoCategoria", "toroseng")
+                        .param("cantidad", "1"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("El traslado debe ser a otro establecimiento")));
+        org.junit.jupiter.api.Assertions.assertEquals(0, movements.count());
     }
 
     @Test

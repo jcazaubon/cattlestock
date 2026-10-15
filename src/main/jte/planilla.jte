@@ -34,7 +34,7 @@
         @if (planilla != null)
             <h2>${planilla.establishment().name()} - ${planilla.month().toString()}</h2>
             @if (planilla.closed())
-                <p><strong>Planilla cerrada.</strong></p>
+                <p><strong>Planilla cerrada.</strong> No se pueden cargar movimientos de este mes. Pedile a un administrador que la reabra si falta algo.</p>
                 <form method="post" action="/planilla/reabrir">
                     <input type="hidden" name="establecimiento" value="${establecimiento}">
                     <input type="hidden" name="mes" value="${mes}">
@@ -44,7 +44,7 @@
                     <button type="submit">Reabrir mes</button>
                 </form>
             @else
-                <form method="post" action="/planilla/cerrar">
+                <form method="post" action="/planilla/cerrar" onsubmit="return confirm('Cerrar la planilla de ${mes}? Despues de cerrarla no se pueden cargar movimientos de ese mes y solo un administrador puede reabrirla.')">
                     <input type="hidden" name="establecimiento" value="${establecimiento}">
                     <input type="hidden" name="mes" value="${mes}">
                     @if (_csrf != null)
