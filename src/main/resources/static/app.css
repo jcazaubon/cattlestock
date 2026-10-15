@@ -290,7 +290,6 @@ th, td {
     padding: .45rem .65rem;
     border-bottom: 1px solid var(--linea);
     text-align: left;
-    white-space: nowrap;
 }
 
 thead th {
@@ -306,9 +305,10 @@ tbody tr:nth-child(even) { background: var(--papel-2); }
 tbody tr:last-child td { border-bottom: 0; }
 
 /* la planilla: la firma de la casa.
-   Entradas con tinta verde, salidas con tinta roja, regla doble bajo el total. */
+   Entradas con tinta verde, salidas con tinta roja, regla doble bajo el total.
+   Es la unica tabla compacta (nowrap): es un formulario numerico ancho. */
 
-.planilla th, .planilla td { font-variant-numeric: tabular-nums; }
+.planilla th, .planilla td { font-variant-numeric: tabular-nums; white-space: nowrap; }
 
 .planilla th:not(:first-child),
 .planilla td:not(:first-child) { text-align: right; }
@@ -412,6 +412,13 @@ select.htmx-request { opacity: .5; }
 
 /* view transitions cortas para la navegacion */
 ::view-transition-old(root), ::view-transition-new(root) { animation-duration: .18s; }
+
+/* pantallas mas angostas: la planilla se apreta y la grilla achica sus numeros
+   para que ninguna tabla necesite scroll horizontal si no es inevitable */
+@media (max-width: 900px) {
+    .planilla th, .planilla td { padding: .35rem .45rem; font-size: .85rem; }
+    .grilla input { min-width: 3.6rem; }
+}
 
 /* ---- responsive ---- */
 
