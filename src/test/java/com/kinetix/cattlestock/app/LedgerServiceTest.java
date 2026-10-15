@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.kinetix.cattlestock.data.MovementRepository;
 import com.kinetix.cattlestock.domain.Column;
 import com.kinetix.cattlestock.domain.DomainException;
+import com.kinetix.cattlestock.domain.Ledger;
 import com.kinetix.cattlestock.domain.Movement;
 import com.kinetix.cattlestock.domain.Planilla;
 import com.kinetix.cattlestock.domain.Species;
@@ -104,6 +105,19 @@ class LedgerServiceTest {
         assertEquals(10, fila(p, "toros").columns().get(Column.COMPRA), "compra");
         assertEquals(5, fila(p, "toros").columns().get(Column.NACIMIENTO), "nacimiento");
         assertEquals(66, fila(p, "toros").finalStock(), "final");
+    }
+
+    @Test
+    void laVistaGeneralDeExistenciaFiltraYCalculaALaFecha() {
+        configurar();
+        service.addMovement(Movement.compra(UUID.randomUUID().toString(), LocalDate.of(2026, 9, 3), "P", "toros", 10));
+
+        List<Ledger.ExistenceRow> todas = service.existencia(LocalDate.of(2026, 9, 30), null, null, null);
+        assertEquals(3, todas.size(), "LM y P con todas sus categorias");
+
+        List<Ledger.ExistenceRow> vacunos = service.existencia(LocalDate.of(2026, 9, 30), "P", Species.VACUNOS, "toros");
+        assertEquals(1, vacunos.size(), "filtro por establecimiento, especie y categoria");
+        assertEquals(61, vacunos.get(0).quantity(), "existencia con la compra incluida");
     }
 
     @Test

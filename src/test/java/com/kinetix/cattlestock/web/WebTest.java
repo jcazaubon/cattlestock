@@ -137,6 +137,42 @@ class WebTest {
     }
 
     @Test
+    void laVistaGeneralMuestraLaExistenciaALaFecha() throws Exception {
+        configurar();
+        mockMvc.perform(get("/existencia").param("establecimiento", "P").param("fecha", "2026-09-30"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Toros")))
+                .andExpect(content().string(containsString(">51<")));
+    }
+
+    @Test
+    void laConfiguracionSeCompletaPorPantalla() throws Exception {
+        mockMvc.perform(post("/configuracion/empresa")
+                        .param("nombre", "Ganadera")
+                        .param("mesInicial", "2026-09"))
+                .andExpect(status().is3xxRedirection());
+        mockMvc.perform(post("/configuracion/establecimientos")
+                        .param("codigo", "X")
+                        .param("nombre", "Campo Nuevo"))
+                .andExpect(status().is3xxRedirection());
+        mockMvc.perform(post("/configuracion/categorias")
+                        .param("establecimiento", "X")
+                        .param("codigo", "novillos")
+                        .param("nombre", "Novillos")
+                        .param("especie", "VACUNOS"))
+                .andExpect(status().is3xxRedirection());
+        mockMvc.perform(post("/configuracion/stock")
+                        .param("establecimiento", "X")
+                        .param("stock_novillos", "40"))
+                .andExpect(status().is3xxRedirection());
+
+        mockMvc.perform(get("/planilla").param("establecimiento", "X").param("mes", "2026-09"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Novillos")))
+                .andExpect(content().string(containsString("<strong>40</strong>")));
+    }
+
+    @Test
     void elFragmentoDeCategoriasRespondeSoloConElSelect() throws Exception {
         configurar();
         mockMvc.perform(get("/alta/categorias").param("establecimiento", "P"))

@@ -127,6 +127,18 @@ public class LedgerService {
         return ledgerFor(List.of(establishmentCode)).planilla(establishmentCode, month);
     }
 
+    /** Vista general de existencia a una fecha. Los filtros en null no filtran. */
+    @Transactional(readOnly = true)
+    public List<Ledger.ExistenceRow> existencia(LocalDate asOf, String establishmentCode,
+                                                Species species, String categoryCode) {
+        List<String> scope = establishmentCode != null && !establishmentCode.isBlank()
+                ? List.of(establishmentCode)
+                : establishments.findAllByOrderByCodeAsc().stream().map(EstablishmentEntity::getCode).toList();
+        String est = establishmentCode != null && !establishmentCode.isBlank() ? establishmentCode : null;
+        String cat = categoryCode != null && !categoryCode.isBlank() ? categoryCode : null;
+        return ledgerFor(scope).existencia(asOf, est, species, cat);
+    }
+
     // --- Cierre de mes ---
 
     @Transactional
