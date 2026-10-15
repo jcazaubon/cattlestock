@@ -38,6 +38,11 @@ public class Seed implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
+        // El usuario admin se garantiza siempre: si la base venia de una version
+        // sin usuarios, hay que poder entrar.
+        if (users.count() == 0) {
+            userService.crear("admin", "admin", UserEntity.Role.ADMIN, List.of());
+        }
         if (companies.findById(CompanyEntity.ID).isPresent()) {
             return;
         }
@@ -64,9 +69,5 @@ public class Seed implements ApplicationRunner {
         service.setOpening("P", "toroseng", 0);
         service.setOpening("P", "yeguarizos", 58);
         service.setOpening("LM", "vacas", 5);
-
-        if (users.count() == 0) {
-            userService.crear("admin", "admin", UserEntity.Role.ADMIN, List.of());
-        }
     }
 }
