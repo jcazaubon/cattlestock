@@ -1,0 +1,302 @@
+/* CattleStock - estilo de planilla impresa.
+   Tokens: papel y tinta de registro, verde campo como unico acento,
+   rojo de correccion solo para salidas y rechazos. */
+
+:root {
+    --papel: #f5f3ec;
+    --papel-2: #faf8f1;
+    --hoja: #fffdf8;
+    --tinta: #212721;
+    --tinta-2: #5a6156;
+    --linea: #dfdacb;
+    --linea-2: #b7b09c;
+    --verde: #2f5d3f;
+    --verde-osc: #234830;
+    --verde-tinta: #e6efe4;
+    --rojo: #a4392d;
+    --rojo-tinta: #f8e9e3;
+    --radio: 10px;
+    --sombra: 0 1px 2px rgba(33, 39, 33, .05), 0 10px 28px -14px rgba(33, 39, 33, .18);
+    --transicion: 150ms ease-out;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--papel);
+    color: var(--tinta);
+    font: 15px/1.55 -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+a { color: var(--verde); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+:focus-visible { outline: 2px solid var(--verde); outline-offset: 1px; }
+
+/* ---- barra superior ---- */
+
+.barra {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    flex-wrap: wrap;
+    background: var(--hoja);
+    border-bottom: 1px solid var(--linea);
+    padding: .55rem 1.1rem;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+
+.marca {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    font-weight: 700;
+    letter-spacing: -.01em;
+    color: var(--tinta);
+    font-size: 1.02rem;
+}
+.marca:hover { text-decoration: none; color: var(--verde-osc); }
+
+/* la caravana: marca de ganado */
+.caravana {
+    width: 1.05rem;
+    height: 1.05rem;
+    border-radius: 3px 8px 3px 3px;
+    background: var(--verde);
+    box-shadow: inset 0 0 0 2px var(--hoja), inset 0 0 0 3.5px var(--verde);
+    flex: none;
+}
+
+.barra nav { display: flex; gap: .9rem; flex-wrap: wrap; }
+.barra nav a { color: var(--tinta-2); font-size: .92rem; }
+.barra nav a:hover { color: var(--verde-osc); text-decoration: none; }
+
+.barra .salir { margin-left: auto; }
+.barra .salir button { border: 0; background: none; color: var(--tinta-2); cursor: pointer; font: inherit; font-size: .88rem; padding: .2rem .3rem; transition: color var(--transicion); }
+.barra .salir button:hover { color: var(--rojo); }
+
+/* ---- layout ---- */
+
+.contenedor { max-width: 1180px; margin: 0 auto; padding: 1.5rem 1.1rem 3rem; }
+
+h1 { font-size: 1.45rem; font-weight: 650; letter-spacing: -.01em; margin: .2rem 0 1rem; }
+h2 { font-size: 1.12rem; font-weight: 650; margin: 1.8rem 0 .7rem; }
+h3 { font-size: .95rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--verde-osc); margin: 1.6rem 0 .5rem; padding-left: .55rem; border-left: 3px solid var(--verde); }
+
+.volver { margin: 0 0 1.1rem; }
+.volver a { color: var(--tinta-2); font-size: .92rem; }
+
+p { margin: .5rem 0; }
+p.introduccion { color: var(--tinta-2); margin-top: -0.6rem; }
+
+/* ---- formularios ---- */
+
+form p { margin: 0 0 .8rem; }
+
+label { display: block; font-size: .85rem; color: var(--tinta-2); margin-bottom: .2rem; }
+
+input, select {
+    font: inherit;
+    color: var(--tinta);
+    background: var(--hoja);
+    border: 1px solid var(--linea-2);
+    border-radius: 8px;
+    padding: .45rem .6rem;
+    max-width: 100%;
+    transition: border-color var(--transicion), box-shadow var(--transicion);
+}
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--verde);
+    box-shadow: 0 0 0 3px var(--verde-tinta);
+}
+
+/* filtros en linea: seleccion de planilla y existencia */
+.filtros { display: flex; align-items: end; gap: .8rem; flex-wrap: wrap; background: var(--hoja); border: 1px solid var(--linea); border-radius: var(--radio); padding: .8rem .9rem; box-shadow: var(--sombra); }
+.filtros label { margin: 0; }
+.filtros input, .filtros select { width: auto; min-width: 9rem; }
+.filtros input[type="date"], .filtros input[type="month"] { min-width: 8rem; }
+
+/* ---- botones ---- */
+
+button { font: inherit; cursor: pointer; }
+
+.boton {
+    display: inline-block;
+    background: var(--verde);
+    color: var(--hoja);
+    border: 1px solid var(--verde);
+    border-radius: 8px;
+    padding: .5rem 1.1rem;
+    font-weight: 600;
+    font-size: .95rem;
+    transition: background var(--transicion), transform var(--transicion);
+}
+.boton:hover { background: var(--verde-osc); text-decoration: none; }
+.boton:active { transform: translateY(1px); }
+
+.boton.boton-linea {
+    background: transparent;
+    color: var(--verde-osc);
+    border: 1px solid var(--linea-2);
+}
+.boton.boton-linea:hover { background: var(--papel-2); border-color: var(--verde); }
+
+.boton.boton-peligro {
+    background: transparent;
+    color: var(--rojo);
+    border: 1px solid var(--linea-2);
+}
+.boton.boton-peligro:hover { background: var(--rojo-tinta); border-color: var(--rojo); }
+
+/* ---- avisos ---- */
+
+.error {
+    background: var(--rojo-tinta);
+    border-left: 3px solid var(--rojo);
+    color: var(--rojo);
+    border-radius: 0 8px 8px 0;
+    padding: .7rem .9rem;
+    margin: .9rem 0;
+}
+
+.aviso {
+    background: var(--hoja);
+    border: 1px solid var(--linea);
+    border-radius: var(--radio);
+    padding: .7rem .9rem;
+    margin: .9rem 0;
+    box-shadow: var(--sombra);
+}
+
+.cerrada {
+    background: var(--papel-2);
+    border-left: 3px solid var(--linea-2);
+    padding: .7rem .9rem;
+    margin: .9rem 0;
+    border-radius: 0 8px 8px 0;
+}
+
+/* ---- filas de acciones ---- */
+
+.acciones { display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; margin: 1rem 0; }
+.acciones form { margin: 0; }
+
+/* ---- tablas ---- */
+
+.tabla-scroll {
+    overflow-x: auto;
+    background: var(--hoja);
+    border: 1px solid var(--linea);
+    border-radius: var(--radio);
+    box-shadow: var(--sombra);
+    margin: .6rem 0 1.2rem;
+}
+
+table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+
+th, td {
+    padding: .45rem .65rem;
+    border-bottom: 1px solid var(--linea);
+    text-align: left;
+    white-space: nowrap;
+}
+
+thead th {
+    background: var(--papel);
+    border-bottom: 2px solid var(--tinta);
+    color: var(--tinta-2);
+    font-size: .78rem;
+    font-weight: 600;
+    letter-spacing: .02em;
+}
+
+tbody tr:nth-child(even) { background: var(--papel-2); }
+tbody tr:last-child td { border-bottom: 0; }
+
+/* la planilla: la firma de la casa.
+   Entradas con tinta verde, salidas con tinta roja, regla doble bajo el total. */
+
+.planilla th, .planilla td { font-variant-numeric: tabular-nums; }
+
+.planilla th:not(:first-child),
+.planilla td:not(:first-child) { text-align: right; }
+
+.planilla thead th:nth-child(3), .planilla thead th:nth-child(4),
+.planilla thead th:nth-child(5), .planilla thead th:nth-child(6),
+.planilla thead th:nth-child(12) { background: var(--verde-tinta); color: var(--verde-osc); }
+
+.planilla thead th:nth-child(7), .planilla thead th:nth-child(8),
+.planilla thead th:nth-child(9), .planilla thead th:nth-child(10),
+.planilla thead th:nth-child(11), .planilla thead th:nth-child(13) { background: var(--rojo-tinta); color: var(--rojo); }
+
+/* regla de tinta que separa el final */
+.planilla td:nth-child(14) { border-left: 2px solid var(--tinta); }
+
+/* doble linea contable bajo el total de cada seccion */
+.planilla tbody tr:last-child { border-top: 3px double var(--tinta); background: var(--papel); }
+.planilla tbody tr:last-child td { font-weight: 700; }
+
+/* tablas chicas */
+.existencia td:last-child { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.grilla input { width: 100%; min-width: 4.2rem; text-align: right; padding: .3rem .4rem; }
+
+/* ---- listas de portada ---- */
+
+.lista-planillas { list-style: none; margin: 0; padding: 0; display: grid; gap: .6rem; max-width: 34rem; }
+.lista-planillas a {
+    display: block;
+    background: var(--hoja);
+    border: 1px solid var(--linea);
+    border-radius: var(--radio);
+    box-shadow: var(--sombra);
+    padding: .75rem 1rem;
+    font-weight: 600;
+    color: var(--tinta);
+    transition: border-color var(--transicion), transform var(--transicion);
+}
+.lista-planillas a:hover { border-color: var(--verde); text-decoration: none; transform: translateY(-1px); }
+
+/* ---- login ---- */
+
+.login { display: grid; place-items: center; min-height: 100dvh; padding: 1rem; }
+
+.tarjeta-login {
+    width: 100%;
+    max-width: 22rem;
+    background: var(--hoja);
+    border: 1px solid var(--linea);
+    border-radius: 14px;
+    box-shadow: var(--sombra);
+    padding: 2rem 1.8rem;
+    text-align: center;
+}
+.tarjeta-login .marca { justify-content: center; font-size: 1.25rem; }
+.tarjeta-login .caravana { width: 1.3rem; height: 1.3rem; }
+.tarjeta-login .introduccion { color: var(--tinta-2); margin: .4rem 0 1.4rem; }
+.tarjeta-login form { text-align: left; }
+.tarjeta-login form p { text-align: left; }
+.tarjeta-login input { width: 100%; }
+
+/* ---- configuracion ---- */
+
+.opciones { display: flex; gap: .6rem 1.2rem; flex-wrap: wrap; margin: .3rem 0 .9rem; }
+.opciones label { display: inline-flex; align-items: center; gap: .4rem; font-size: .92rem; color: var(--tinta); margin: 0; }
+
+.vacio { color: var(--tinta-2); background: var(--papel-2); border: 1px dashed var(--linea-2); border-radius: var(--radio); padding: .9rem 1rem; margin: .8rem 0; }
+
+/* ---- responsive ---- */
+
+@media (max-width: 640px) {
+    .contenedor { padding: 1rem .8rem 2.5rem; }
+    .barra { padding: .5rem .8rem; }
+    .filtros input, .filtros select { min-width: 8rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+}

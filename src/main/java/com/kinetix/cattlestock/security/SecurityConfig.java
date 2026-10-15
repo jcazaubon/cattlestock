@@ -29,6 +29,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login").permitAll()
                         .requestMatchers("/htmx.min.js").permitAll()
+                        .requestMatchers("/app.css").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/configuracion/**").hasRole("ADMIN")
                         .anyRequest().authenticated())

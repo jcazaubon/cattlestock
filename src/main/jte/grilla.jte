@@ -13,57 +13,74 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Carga rapida - CattleStock</title>
+        <link rel="stylesheet" href="/app.css">
         <script src="/htmx.min.js"></script>
     </head>
     <body>
-        <h1>Carga rapida en grilla</h1>
-        <p><a href="/">Inicio</a> | <a href="/alta">Cargar un movimiento</a></p>
-        @if (error != null)
-            <p class="error"><strong>${error}</strong></p>
-        @endif
-        <form method="post" action="/grilla">
-            @if (_csrf != null)
-                <input type="hidden" name="${_csrf.getParameterName()}" value="${_csrf.getToken()}">
+        <header class="barra">
+            <a class="marca" href="/"><span class="caravana" aria-hidden="true"></span>CattleStock</a>
+            <nav>
+                <a href="/alta">Cargar movimiento</a>
+                <a href="/existencia">Existencia</a>
+            </nav>
+            <form method="post" action="/logout" class="salir">
+                @if (_csrf != null)
+                    <input type="hidden" name="${_csrf.getParameterName()}" value="${_csrf.getToken()}">
+                @endif
+                <button type="submit">Salir</button>
+            </form>
+        </header>
+        <main class="contenedor">
+            <h1>Carga rapida en grilla</h1>
+            @if (error != null)
+                <p class="error"><strong>${error}</strong></p>
             @endif
-            <p>
-                <label>Fecha<br>
-                    <input type="date" name="fecha" value="${fecha.isEmpty() ? hoy : fecha}" required>
-                </label>
-            </p>
-            <p>
-                <label>Establecimiento<br>
-                    <select name="establecimiento" required
-                            hx-get="/grilla/filas" hx-target="#filas" hx-include="this">
-                        <option value=""></option>
-                        @for (var est : establecimientos)
-                            <option value="${est.getCode()}" selected="${est.getCode().equals(establecimiento)}">${est.getName()}</option>
-                        @endfor
-                    </select>
-                </label>
-            </p>
-            <p>Una fila por categoria. Se cargan solo las celdas con numero. Traslados y cambios de categoria van por el formulario de alta.</p>
-            <table border="1">
-                <thead>
-                    <tr>
-                        <th>Categoria</th>
-                        <th>Compra</th>
-                        <th>Nacimiento</th>
-                        <th>Venta</th>
-                        <th>Mortandad</th>
-                        <th>Cueros</th>
-                        <th>Consumo</th>
-                    </tr>
-                </thead>
-                <tbody id="filas">
-                    @template.fragment.filasGrilla(categorias = categorias, valores = valores)
-                </tbody>
-            </table>
-            <p>
-                <label>Nota (para todo el lote)<br>
-                    <input type="text" name="nota" value="${nota}">
-                </label>
-            </p>
-            <p><button type="submit">Guardar lote</button></p>
-        </form>
+            <p class="introduccion">Una fila por categoria, una fecha para todo el lote. Se cargan solo las celdas con numero. Traslados y cambios de categoria van por el formulario de alta, porque necesitan destino.</p>
+            <form method="post" action="/grilla">
+                @if (_csrf != null)
+                    <input type="hidden" name="${_csrf.getParameterName()}" value="${_csrf.getToken()}">
+                @endif
+                <p>
+                    <label>Fecha<br>
+                        <input type="date" name="fecha" value="${fecha.isEmpty() ? hoy : fecha}" required>
+                    </label>
+                </p>
+                <p>
+                    <label>Establecimiento<br>
+                        <select name="establecimiento" required
+                                hx-get="/grilla/filas" hx-target="#filas" hx-include="this">
+                            <option value=""></option>
+                            @for (var est : establecimientos)
+                                <option value="${est.getCode()}" selected="${est.getCode().equals(establecimiento)}">${est.getName()}</option>
+                            @endfor
+                        </select>
+                    </label>
+                </p>
+                <div class="tabla-scroll">
+                    <table class="grilla">
+                        <thead>
+                            <tr>
+                                <th>Categoria</th>
+                                <th>Compra</th>
+                                <th>Nacimiento</th>
+                                <th>Venta</th>
+                                <th>Mortandad</th>
+                                <th>Cueros</th>
+                                <th>Consumo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="filas">
+                            @template.fragment.filasGrilla(categorias = categorias, valores = valores)
+                        </tbody>
+                    </table>
+                </div>
+                <p>
+                    <label>Nota (para todo el lote)<br>
+                        <input type="text" name="nota" value="${nota}">
+                    </label>
+                </p>
+                <p><button type="submit" class="boton">Guardar lote</button></p>
+            </form>
+        </main>
     </body>
 </html>
