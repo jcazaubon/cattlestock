@@ -3,3 +3,4 @@
 !graft/
 graft/.cache/
 graft/.graph/
+src/main/resources/static/htmx.min.js
