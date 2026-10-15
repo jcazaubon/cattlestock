@@ -109,6 +109,34 @@ class WebTest {
     }
 
     @Test
+    void laGrillaCargaUnLoteYSaltaALaPlanilla() throws Exception {
+        configurar();
+        mockMvc.perform(post("/grilla")
+                        .param("establecimiento", "P")
+                        .param("fecha", "2026-09-03")
+                        .param("compra_toros", "10")
+                        .param("nacimiento_toros", "2"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/planilla?establecimiento=P&mes=2026-09"));
+        org.junit.jupiter.api.Assertions.assertEquals(2, movements.count());
+    }
+
+    @Test
+    void laGrillaRechazadaMuestraElErrorConservaLosValoresYNoPersiste() throws Exception {
+        configurar();
+        mockMvc.perform(post("/grilla")
+                        .param("establecimiento", "P")
+                        .param("fecha", "2026-09-03")
+                        .param("compra_toros", "10")
+                        .param("venta_toroseng", "1"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Stock insuficiente")))
+                .andExpect(content().string(containsString("value=\"10\"")))
+                .andExpect(content().string(containsString("Carga rapida en grilla")));
+        org.junit.jupiter.api.Assertions.assertEquals(0, movements.count());
+    }
+
+    @Test
     void elFragmentoDeCategoriasRespondeSoloConElSelect() throws Exception {
         configurar();
         mockMvc.perform(get("/alta/categorias").param("establecimiento", "P"))

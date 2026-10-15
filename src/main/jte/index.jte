@@ -12,7 +12,7 @@
     <body>
         <h1>${appName}</h1>
         <p>Registro de movimientos de hacienda.</p>
-        <p><a href="/alta">Cargar movimiento</a></p>
+        <p><a href="/alta">Cargar movimiento</a> | <a href="/grilla">Carga rapida en grilla</a> | <a href="/existencia">Existencia</a></p>
         <h2>Planillas</h2>
         @if (establecimientos.isEmpty())
             <p>No hay establecimientos configurados todavia.</p>

@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -83,6 +84,26 @@ class LedgerServiceTest {
         assertEquals(41, fila(principal, "toros").finalStock(), "final Principal");
         assertEquals(10, fila(lm, "vacas").columns().get(Column.TRASLADO_ENTRA), "entra en La Marta");
         assertEquals(15, fila(lm, "vacas").finalStock(), "final La Marta");
+    }
+
+    @Test
+    void unaCargaEnGrillaEsTodoONadaPersistido() {
+        configurar();
+        DomainException e = assertThrows(DomainException.class, () -> service.addBatch(List.of(
+                Movement.compra(UUID.randomUUID().toString(), LocalDate.of(2026, 9, 3), "P", "toros", 10),
+                Movement.venta(UUID.randomUUID().toString(), LocalDate.of(2026, 9, 3), "P", "toroseng", 1))));
+        assertTrue(e.getMessage().contains("Stock insuficiente"), e.getMessage());
+        assertEquals(0, movements.count(), "no debe quedar nada guardado");
+
+        service.addBatch(List.of(
+                Movement.compra(UUID.randomUUID().toString(), LocalDate.of(2026, 9, 3), "P", "toros", 10),
+                Movement.nacimiento(UUID.randomUUID().toString(), LocalDate.of(2026, 9, 3), "P", "toros", 5)));
+        assertEquals(2, movements.count(), "el lote valido se guarda completo");
+
+        Planilla p = service.planilla("P", SEP);
+        assertEquals(10, fila(p, "toros").columns().get(Column.COMPRA), "compra");
+        assertEquals(5, fila(p, "toros").columns().get(Column.NACIMIENTO), "nacimiento");
+        assertEquals(66, fila(p, "toros").finalStock(), "final");
     }
 
     @Test
