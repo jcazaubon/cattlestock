@@ -12,6 +12,7 @@
 @param java.util.List<com.kinetix.cattlestock.data.EstablishmentEntity> establecimientos
 @param java.util.List<com.kinetix.cattlestock.data.CategoryEntity> categorias
 @param java.util.List<com.kinetix.cattlestock.data.CategoryEntity> destinoCategorias
+@param org.springframework.security.web.csrf.CsrfToken _csrf
 <!DOCTYPE html>
 <html lang="es">
     <head>
@@ -27,6 +28,9 @@
             <p class="error"><strong>${error}</strong></p>
         @endif
         <form method="post" action="/movimientos">
+            @if (_csrf != null)
+                <input type="hidden" name="${_csrf.getParameterName()}" value="${_csrf.getToken()}">
+            @endif
             <p>
                 <label>Fecha<br>
                     <input type="date" name="fecha" value="${fecha.isEmpty() ? hoy : fecha}" required>

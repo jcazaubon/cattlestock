@@ -58,17 +58,14 @@ Criterios de aceptación:
 
 ## Estado actual
 
-Funciona y está verificado (30 pruebas con `./mvnw test`, atajos `./verify` y `verify.cmd`): el dominio en Java puro dentro del proyecto Spring Boot (`com.kinetix.cattlestock.domain`), con persistencia y pantallas.
-- Libro de movimientos con stock inicial, los siete tipos de movimiento y carga en bloque (todo o nada).
-- Regla de stock negativo, revisada al cierre de cada día, también con movimientos de fecha pasada.
-- Planilla mensual por establecimiento con anterior, columnas, final y totales por especie. El final de un mes es el anterior del siguiente.
-- Cambios de categoría y traslados (con La Marta) como un solo movimiento de dos lados.
-- Cierre de mes en orden, que bloquea la carga en ambos lados de un traslado, y reapertura del último mes.
-- Vista general de existencia con filtros por establecimiento, especie y categoría, a una fecha (en el dominio; falta la pantalla).
-- Persistencia JPA (`com.kinetix.cattlestock.data`): empresa, establecimientos, categorías, stock inicial, movimientos y cierres. El stock se sigue calculando, no se guarda.
-- Capa de aplicación (`LedgerService`): arma un Ledger desde la base y delega todas las reglas en el dominio.
-- Pantallas JTE + HTMX: alta de movimientos (formulario con selects dependientes; los errores del dominio se muestran y conservan lo escrito) y planilla mensual con cerrar y reabrir mes. Un seed carga datos de prueba la primera vez.
+Funciona y está verificado (46 pruebas con `./mvnw test`, atajos `./verify` y `verify.cmd`). Los diez criterios del primer resultado útil están hechos.
 
-Falta: usuarios y roles, carga en grilla, exportar a Excel, vista general como pantalla, pantallas de configuración (hoy datos de prueba por seed), MariaDB real en producción.
+- Dominio puro (`com.kinetix.cattlestock.domain`): libro de movimientos con los siete tipos, stock negativo revisado por día, planilla mensual por establecimiento con totales por especie, traslados y cambios de categoría de dos lados, cierres en orden.
+- Persistencia JPA (`data`): empresa, establecimientos, categorías, stock inicial, movimientos, cierres y usuarios. El stock se calcula, no se guarda.
+- Capa de aplicación (`app`): `LedgerService` arma el Ledger desde la base y delega las reglas en el dominio; `UserService` con BCrypt; seed de datos de prueba y usuario admin/admin.
+- Pantallas JTE + HTMX (`web`): alta de movimientos, carga rápida en grilla (todo o nada), planilla mensual con cerrar y reabrir, vista general de existencia con filtros, configuración completa (empresa, establecimientos, categorías, stock inicial, usuarios) y exportación a Excel con POI.
+- Seguridad: login propio, todo autenticado, configuración solo para administradores; el usuario de carga solo ve y carga en sus establecimientos; la reapertura de mes queda solo para admin.
 
-Próximo paso: carga rápida en grilla (una fecha, varias categorías) o exportación de la planilla a Excel, a elección.
+Falta: MariaDB real en producción (config lista y comentada) y desplegar en un servidor.
+
+Próximo paso: desplegarlo en un servidor con MariaDB y cargar la planilla real de octubre.

@@ -1,6 +1,7 @@
 package com.kinetix.cattlestock.web;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -9,39 +10,38 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.YearMonth;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.WebApplicationContext;
 
 import com.kinetix.cattlestock.app.LedgerService;
+import com.kinetix.cattlestock.app.UserService;
 import com.kinetix.cattlestock.data.MovementRepository;
+import com.kinetix.cattlestock.data.UserEntity;
 import com.kinetix.cattlestock.domain.Species;
 
-/** Pruebas de las pantallas de alta y planilla contra H2 en memoria. */
+/** Pruebas de las pantallas, como administrador. */
 @SpringBootTest
+@AutoConfigureMockMvc
 @Transactional
+@WithMockUser(username = "admin", roles = "ADMIN")
 class WebTest {
 
     @Autowired
-    WebApplicationContext context;
+    MockMvc mockMvc;
 
     @Autowired
     LedgerService service;
 
     @Autowired
+    UserService userService;
+
+    @Autowired
     MovementRepository movements;
-
-    MockMvc mockMvc;
-
-    @BeforeEach
-    void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
-    }
 
     void configurar() {
         service.configureCompany("Empresa de prueba", YearMonth.of(2026, 9));
@@ -50,6 +50,7 @@ class WebTest {
         service.createCategory("P", "toroseng", "Toros Engorde", Species.VACUNOS);
         service.setOpening("P", "toros", 51);
         service.setOpening("P", "toroseng", 0);
+        userService.crear("admin", "admin", UserEntity.Role.ADMIN, java.util.List.of());
     }
 
     @Test
@@ -64,7 +65,7 @@ class WebTest {
     @Test
     void unAltaValidaRedirigeALaPlanillaYPersiste() throws Exception {
         configurar();
-        mockMvc.perform(post("/movimientos")
+        mockMvc.perform(post("/movimientos").with(csrf())
                         .param("fecha", "2026-09-03")
                         .param("tipo", "COMPRA")
                         .param("establecimiento", "P")
@@ -78,7 +79,7 @@ class WebTest {
     @Test
     void unAltaRechazadaVuelveConErrorEnEspanolYNoPersiste() throws Exception {
         configurar();
-        mockMvc.perform(post("/movimientos")
+        mockMvc.perform(post("/movimientos").with(csrf())
                         .param("fecha", "2026-09-03")
                         .param("tipo", "VENTA")
                         .param("establecimiento", "P")
@@ -93,7 +94,7 @@ class WebTest {
     @Test
     void laPlanillaRenderizaConLosDatosDelMes() throws Exception {
         configurar();
-        mockMvc.perform(post("/movimientos")
+        mockMvc.perform(post("/movimientos").with(csrf())
                         .param("fecha", "2026-09-03")
                         .param("tipo", "COMPRA")
                         .param("establecimiento", "P")
@@ -105,13 +106,14 @@ class WebTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Toros")))
                 .andExpect(content().string(containsString("<strong>61</strong>")))
-                .andExpect(content().string(containsString("Cerrar mes")));
+                .andExpect(content().string(containsString("Cerrar mes")))
+                .andExpect(content().string(containsString("Descargar Excel")));
     }
 
     @Test
     void laGrillaCargaUnLoteYSaltaALaPlanilla() throws Exception {
         configurar();
-        mockMvc.perform(post("/grilla")
+        mockMvc.perform(post("/grilla").with(csrf())
                         .param("establecimiento", "P")
                         .param("fecha", "2026-09-03")
                         .param("compra_toros", "10")
@@ -124,7 +126,7 @@ class WebTest {
     @Test
     void laGrillaRechazadaMuestraElErrorConservaLosValoresYNoPersiste() throws Exception {
         configurar();
-        mockMvc.perform(post("/grilla")
+        mockMvc.perform(post("/grilla").with(csrf())
                         .param("establecimiento", "P")
                         .param("fecha", "2026-09-03")
                         .param("compra_toros", "10")
@@ -134,6 +136,15 @@ class WebTest {
                 .andExpect(content().string(containsString("value=\"10\"")))
                 .andExpect(content().string(containsString("Carga rapida en grilla")));
         org.junit.jupiter.api.Assertions.assertEquals(0, movements.count());
+    }
+
+    @Test
+    void elFragmentoDeCategoriasRespondeSoloConElSelect() throws Exception {
+        configurar();
+        mockMvc.perform(get("/alta/categorias").param("establecimiento", "P"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Toros")))
+                .andExpect(content().string(containsString("<select name=\"categoria\"")));
     }
 
     @Test
@@ -147,21 +158,22 @@ class WebTest {
 
     @Test
     void laConfiguracionSeCompletaPorPantalla() throws Exception {
-        mockMvc.perform(post("/configuracion/empresa")
+        userService.crear("admin", "admin", UserEntity.Role.ADMIN, java.util.List.of());
+        mockMvc.perform(post("/configuracion/empresa").with(csrf())
                         .param("nombre", "Ganadera")
                         .param("mesInicial", "2026-09"))
                 .andExpect(status().is3xxRedirection());
-        mockMvc.perform(post("/configuracion/establecimientos")
+        mockMvc.perform(post("/configuracion/establecimientos").with(csrf())
                         .param("codigo", "X")
                         .param("nombre", "Campo Nuevo"))
                 .andExpect(status().is3xxRedirection());
-        mockMvc.perform(post("/configuracion/categorias")
+        mockMvc.perform(post("/configuracion/categorias").with(csrf())
                         .param("establecimiento", "X")
                         .param("codigo", "novillos")
                         .param("nombre", "Novillos")
                         .param("especie", "VACUNOS"))
                 .andExpect(status().is3xxRedirection());
-        mockMvc.perform(post("/configuracion/stock")
+        mockMvc.perform(post("/configuracion/stock").with(csrf())
                         .param("establecimiento", "X")
                         .param("stock_novillos", "40"))
                 .andExpect(status().is3xxRedirection());
@@ -173,11 +185,17 @@ class WebTest {
     }
 
     @Test
-    void elFragmentoDeCategoriasRespondeSoloConElSelect() throws Exception {
+    void laConfiguracionCreaUnUsuarioDeCarga() throws Exception {
         configurar();
-        mockMvc.perform(get("/alta/categorias").param("establecimiento", "P"))
+        mockMvc.perform(post("/configuracion/usuarios").with(csrf())
+                        .param("username", "pepe")
+                        .param("password", "secreto")
+                        .param("rol", "CARGA")
+                        .param("establecimientos", "P"))
+                .andExpect(status().is3xxRedirection());
+
+        mockMvc.perform(get("/configuracion"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Toros")))
-                .andExpect(content().string(containsString("<select name=\"categoria\"")));
+                .andExpect(content().string(containsString("pepe")));
     }
 }

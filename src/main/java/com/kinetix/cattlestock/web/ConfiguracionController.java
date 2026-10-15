@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.kinetix.cattlestock.app.LedgerService;
+import com.kinetix.cattlestock.app.UserService;
 import com.kinetix.cattlestock.data.CategoryEntity;
 import com.kinetix.cattlestock.data.CategoryRepository;
 import com.kinetix.cattlestock.data.CompanyEntity;
@@ -22,10 +23,12 @@ import com.kinetix.cattlestock.data.CompanyRepository;
 import com.kinetix.cattlestock.data.EstablishmentRepository;
 import com.kinetix.cattlestock.data.OpeningEntity;
 import com.kinetix.cattlestock.data.OpeningRepository;
+import com.kinetix.cattlestock.data.UserEntity;
+import com.kinetix.cattlestock.data.UserRepository;
 import com.kinetix.cattlestock.domain.DomainException;
 import com.kinetix.cattlestock.domain.Species;
 
-/** Configuracion: empresa, establecimientos, categorias y stock inicial. */
+/** Configuracion: empresa, establecimientos, categorias, stock inicial y usuarios. Solo administradores. */
 @Controller
 public class ConfiguracionController {
 
@@ -34,19 +37,23 @@ public class ConfiguracionController {
     }
 
     private final LedgerService service;
+    private final UserService userService;
     private final CompanyRepository companies;
     private final EstablishmentRepository establishments;
     private final CategoryRepository categories;
     private final OpeningRepository openings;
+    private final UserRepository users;
 
-    public ConfiguracionController(LedgerService service, CompanyRepository companies,
+    public ConfiguracionController(LedgerService service, UserService userService, CompanyRepository companies,
                                     EstablishmentRepository establishments, CategoryRepository categories,
-                                    OpeningRepository openings) {
+                                    OpeningRepository openings, UserRepository users) {
         this.service = service;
+        this.userService = userService;
         this.companies = companies;
         this.establishments = establishments;
         this.categories = categories;
         this.openings = openings;
+        this.users = users;
     }
 
     @GetMapping("/configuracion")
@@ -59,6 +66,7 @@ public class ConfiguracionController {
         model.addAttribute("establecimientos", establishments.findAllByOrderByCodeAsc());
         model.addAttribute("seleccionado", seleccionado);
         model.addAttribute("filas", filasDe(seleccionado));
+        model.addAttribute("usuarios", users.findAllByOrderByUsernameAsc());
         return "configuracion";
     }
 
@@ -117,6 +125,26 @@ public class ConfiguracionController {
                     + "&error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8);
         }
         return "redirect:/configuracion?establecimiento=" + establecimiento;
+    }
+
+    @PostMapping("/configuracion/usuarios")
+    public String crearUsuario(@RequestParam String username,
+                               @RequestParam String password,
+                               @RequestParam String rol,
+                               @RequestParam(required = false) List<String> establecimientos) {
+        try {
+            UserEntity.Role role;
+            try {
+                role = UserEntity.Role.valueOf(texto(rol, "Elegi el rol"));
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("El rol no es valido");
+            }
+            userService.crear(texto(username, "Escribi el usuario"), password, role,
+                    establecimientos == null ? List.of() : establecimientos);
+        } catch (DomainException | IllegalArgumentException e) {
+            return conError(e.getMessage());
+        }
+        return "redirect:/configuracion";
     }
 
     // --- Helpers ---

@@ -5,6 +5,7 @@
 @param String establecimiento
 @param String mes
 @param String error
+@param org.springframework.security.web.csrf.CsrfToken _csrf
 <!DOCTYPE html>
 <html lang="es">
     <head>
@@ -37,12 +38,18 @@
                 <form method="post" action="/planilla/reabrir">
                     <input type="hidden" name="establecimiento" value="${establecimiento}">
                     <input type="hidden" name="mes" value="${mes}">
+                    @if (_csrf != null)
+                        <input type="hidden" name="${_csrf.getParameterName()}" value="${_csrf.getToken()}">
+                    @endif
                     <button type="submit">Reabrir mes</button>
                 </form>
             @else
                 <form method="post" action="/planilla/cerrar">
                     <input type="hidden" name="establecimiento" value="${establecimiento}">
                     <input type="hidden" name="mes" value="${mes}">
+                    @if (_csrf != null)
+                        <input type="hidden" name="${_csrf.getParameterName()}" value="${_csrf.getToken()}">
+                    @endif
                     <button type="submit">Cerrar mes</button>
                 </form>
             @endif

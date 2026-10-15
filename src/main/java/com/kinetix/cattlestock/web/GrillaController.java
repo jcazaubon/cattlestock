@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.kinetix.cattlestock.app.LedgerService;
 import com.kinetix.cattlestock.data.CategoryEntity;
 import com.kinetix.cattlestock.data.CategoryRepository;
-import com.kinetix.cattlestock.data.EstablishmentRepository;
 import com.kinetix.cattlestock.domain.DomainException;
 import com.kinetix.cattlestock.domain.Movement;
 import com.kinetix.cattlestock.domain.MovementType;
@@ -30,13 +29,13 @@ import com.kinetix.cattlestock.domain.MovementType;
 public class GrillaController {
 
     private final LedgerService service;
-    private final EstablishmentRepository establishments;
     private final CategoryRepository categories;
+    private final CurrentUser currentUser;
 
-    public GrillaController(LedgerService service, EstablishmentRepository establishments, CategoryRepository categories) {
+    public GrillaController(LedgerService service, CategoryRepository categories, CurrentUser currentUser) {
         this.service = service;
-        this.establishments = establishments;
         this.categories = categories;
+        this.currentUser = currentUser;
     }
 
     @GetMapping("/grilla")
@@ -51,15 +50,15 @@ public class GrillaController {
         model.addAttribute("fecha", s(fecha));
         model.addAttribute("nota", s(nota));
         model.addAttribute("hoy", LocalDate.now().toString());
-        model.addAttribute("establecimientos", establishments.findAllByOrderByCodeAsc());
-        model.addAttribute("categorias", categoriasDe(establecimiento));
+        model.addAttribute("establecimientos", currentUser.establecimientos());
+        model.addAttribute("categorias", categoriasVisibles(establecimiento));
         model.addAttribute("valores", valores == null ? Map.of() : valores);
         return "grilla";
     }
 
     @GetMapping("/grilla/filas")
     public String filas(@RequestParam(required = false) String establecimiento, Model model) {
-        model.addAttribute("categorias", categoriasDe(establecimiento));
+        model.addAttribute("categorias", categoriasVisibles(establecimiento));
         return "fragment/filasGrilla";
     }
 
@@ -71,6 +70,9 @@ public class GrillaController {
                          @RequestParam Map<String, String> valores) {
         try {
             LocalDate d = parseFecha(texto(fecha, "Elegi la fecha"));
+            if (!currentUser.puedeAcceder(establecimiento)) {
+                throw new IllegalArgumentException("No podes cargar en " + establecimiento);
+            }
             List<Movement> lote = construir(establecimiento, d, nota, valores);
             if (lote.isEmpty()) {
                 throw new IllegalArgumentException("No escribiste ninguna cantidad");
@@ -87,7 +89,7 @@ public class GrillaController {
     private List<Movement> construir(String establecimiento, LocalDate fecha, String nota, Map<String, String> valores) {
         String note = nota == null || nota.isBlank() ? null : nota.trim();
         List<Movement> lote = new ArrayList<>();
-        for (CategoryEntity c : categoriasDe(establecimiento)) {
+        for (CategoryEntity c : categoriasVisibles(establecimiento)) {
             String cat = c.getCode();
             agregar(lote, establecimiento, cat, fecha, valores.get("compra_" + cat), MovementType.COMPRA, 0, note);
             agregar(lote, establecimiento, cat, fecha, valores.get("nacimiento_" + cat), MovementType.NACIMIENTO, 0, note);
@@ -132,8 +134,11 @@ public class GrillaController {
         return valor.trim();
     }
 
-    private List<CategoryEntity> categoriasDe(String establecimiento) {
-        if (establecimiento == null || establecimiento.isBlank()) return List.of();
+    private List<CategoryEntity> categoriasVisibles(String establecimiento) {
+        if (establecimiento == null || establecimiento.isBlank()
+                || !currentUser.puedeAcceder(establecimiento)) {
+            return List.of();
+        }
         return categories.findByEstablishmentCodeOrderByPositionAsc(establecimiento);
     }
 

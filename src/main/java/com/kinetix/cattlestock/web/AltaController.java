@@ -15,23 +15,23 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.kinetix.cattlestock.app.LedgerService;
 import com.kinetix.cattlestock.data.CategoryEntity;
 import com.kinetix.cattlestock.data.CategoryRepository;
-import com.kinetix.cattlestock.data.EstablishmentRepository;
+import com.kinetix.cattlestock.data.EstablishmentEntity;
 import com.kinetix.cattlestock.domain.DomainException;
 import com.kinetix.cattlestock.domain.Movement;
 import com.kinetix.cattlestock.domain.MovementType;
 
-/** Alta de movimientos, de a uno. La carga en grilla sera otra pantalla. */
+/** Alta de movimientos, de a uno. La carga en grilla va por /grilla. */
 @Controller
 public class AltaController {
 
     private final LedgerService service;
-    private final EstablishmentRepository establishments;
     private final CategoryRepository categories;
+    private final CurrentUser currentUser;
 
-    public AltaController(LedgerService service, EstablishmentRepository establishments, CategoryRepository categories) {
+    public AltaController(LedgerService service, CategoryRepository categories, CurrentUser currentUser) {
         this.service = service;
-        this.establishments = establishments;
         this.categories = categories;
+        this.currentUser = currentUser;
     }
 
     @GetMapping("/alta")
@@ -57,7 +57,7 @@ public class AltaController {
         model.addAttribute("destinoEstablecimiento", s(destinoEstablecimiento));
         model.addAttribute("destinoCategoria", s(destinoCategoria));
         model.addAttribute("hoy", LocalDate.now().toString());
-        model.addAttribute("establecimientos", establishments.findAllByOrderByCodeAsc());
+        model.addAttribute("establecimientos", currentUser.establecimientos());
         model.addAttribute("categorias", categoriasDe(establecimiento));
         model.addAttribute("destinoCategorias", categoriasDe(destinoEstablecimiento));
         return "alta";
@@ -92,7 +92,7 @@ public class AltaController {
     public String categorias(@RequestParam(required = false) String establecimiento,
                              @RequestParam(required = false) String categoria,
                              Model model) {
-        model.addAttribute("categorias", categoriasDe(establecimiento));
+        model.addAttribute("categorias", categoriasVisibles(establecimiento));
         model.addAttribute("categoria", s(categoria));
         return "fragment/categorias";
     }
@@ -101,7 +101,7 @@ public class AltaController {
     public String destinoCategorias(@RequestParam(required = false) String destinoEstablecimiento,
                                     @RequestParam(required = false) String destinoCategoria,
                                     Model model) {
-        model.addAttribute("destinoCategorias", categoriasDe(destinoEstablecimiento));
+        model.addAttribute("destinoCategorias", categoriasVisibles(destinoEstablecimiento));
         model.addAttribute("destinoCategoria", s(destinoCategoria));
         return "fragment/destinoCategorias";
     }
@@ -118,8 +118,8 @@ public class AltaController {
         model.addAttribute("categoria", s(categoria));
         model.addAttribute("destinoEstablecimiento", s(destinoEstablecimiento));
         model.addAttribute("destinoCategoria", s(destinoCategoria));
-        model.addAttribute("establecimientos", establishments.findAllByOrderByCodeAsc());
-        model.addAttribute("categorias", categoriasDe(establecimiento));
+        model.addAttribute("establecimientos", currentUser.establecimientos());
+        model.addAttribute("categorias", categoriasVisibles(establecimiento));
         model.addAttribute("destinoCategorias", categoriasDe(destinoEstablecimiento));
         return "fragment/campos";
     }
@@ -129,6 +129,10 @@ public class AltaController {
     private Movement construir(String fecha, String tipo, String establecimiento, String categoria,
                                String cantidad, String cueros, String nota,
                                String destinoEstablecimiento, String destinoCategoria) {
+        String est = texto(establecimiento, "Elegi el establecimiento");
+        if (!currentUser.puedeAcceder(est)) {
+            throw new IllegalArgumentException("No podes cargar en " + est);
+        }
         LocalDate d;
         try {
             d = LocalDate.parse(texto(fecha, "Elegi la fecha"));
@@ -147,7 +151,6 @@ public class AltaController {
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("La cantidad debe ser un numero entero");
         }
-        String est = texto(establecimiento, "Elegi el establecimiento");
         String cat = texto(categoria, "Elegi la categoria");
         String id = UUID.randomUUID().toString();
         String note = nota == null || nota.isBlank() ? null : nota.trim();
@@ -169,6 +172,14 @@ public class AltaController {
     private String texto(String valor, String mensajeSiFalta) {
         if (valor == null || valor.isBlank()) throw new IllegalArgumentException(mensajeSiFalta);
         return valor.trim();
+    }
+
+    private List<CategoryEntity> categoriasVisibles(String establecimiento) {
+        if (establecimiento == null || establecimiento.isBlank()
+                || !currentUser.puedeAcceder(establecimiento)) {
+            return List.of();
+        }
+        return categoriasDe(establecimiento);
     }
 
     private List<CategoryEntity> categoriasDe(String establecimiento) {

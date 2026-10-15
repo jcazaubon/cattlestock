@@ -1,30 +1,39 @@
 package com.kinetix.cattlestock.app;
 
 import java.time.YearMonth;
+import java.util.List;
 
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import com.kinetix.cattlestock.app.LedgerService;
+import com.kinetix.cattlestock.app.UserService;
 import com.kinetix.cattlestock.data.CompanyEntity;
 import com.kinetix.cattlestock.data.CompanyRepository;
+import com.kinetix.cattlestock.data.UserEntity;
+import com.kinetix.cattlestock.data.UserRepository;
 import com.kinetix.cattlestock.domain.Species;
 
 /**
- * Datos de prueba para arrancar la app mientras no haya pantallas de configuracion.
- * Corre una sola vez: si la empresa ya esta configurada, no hace nada. Provisional.
+ * Datos de prueba para arrancar la app: empresa, establecimientos, stock inicial y el
+ * usuario admin (admin/admin). Corre una sola vez, si la empresa no esta configurada.
  */
 @Component
 @ConditionalOnProperty(name = "cattlestock.seed", havingValue = "true", matchIfMissing = true)
 public class Seed implements ApplicationRunner {
 
     private final LedgerService service;
+    private final UserService userService;
     private final CompanyRepository companies;
+    private final UserRepository users;
 
-    public Seed(LedgerService service, CompanyRepository companies) {
+    public Seed(LedgerService service, UserService userService, CompanyRepository companies, UserRepository users) {
         this.service = service;
+        this.userService = userService;
         this.companies = companies;
+        this.users = users;
     }
 
     @Override
@@ -55,5 +64,9 @@ public class Seed implements ApplicationRunner {
         service.setOpening("P", "toroseng", 0);
         service.setOpening("P", "yeguarizos", 58);
         service.setOpening("LM", "vacas", 5);
+
+        if (users.count() == 0) {
+            userService.crear("admin", "admin", UserEntity.Role.ADMIN, List.of());
+        }
     }
 }

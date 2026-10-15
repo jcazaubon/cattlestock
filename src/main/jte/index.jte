@@ -1,6 +1,8 @@
 @param String appName
 @param String mesActual
+@param boolean esAdmin
 @param java.util.List<com.kinetix.cattlestock.data.EstablishmentEntity> establecimientos
+@param org.springframework.security.web.csrf.CsrfToken _csrf
 <!DOCTYPE html>
 <html lang="es">
     <head>
@@ -12,10 +14,17 @@
     <body>
         <h1>${appName}</h1>
         <p>Registro de movimientos de hacienda.</p>
-        <p><a href="/alta">Cargar movimiento</a> | <a href="/grilla">Carga rapida en grilla</a> | <a href="/existencia">Existencia</a> | <a href="/configuracion">Configuracion</a></p>
+        <p>
+            <a href="/alta">Cargar movimiento</a> |
+            <a href="/grilla">Carga rapida en grilla</a> |
+            <a href="/existencia">Existencia</a>
+            @if (esAdmin)
+                | <a href="/configuracion">Configuracion</a>
+            @endif
+        </p>
         <h2>Planillas</h2>
         @if (establecimientos.isEmpty())
-            <p>No hay establecimientos configurados todavia.</p>
+            <p>No hay establecimientos asignados. Pedile al administrador que te asigne.</p>
         @else
             <ul>
                 @for (var est : establecimientos)
@@ -23,5 +32,11 @@
                 @endfor
             </ul>
         @endif
+        <form method="post" action="/logout">
+            @if (_csrf != null)
+                <input type="hidden" name="${_csrf.getParameterName()}" value="${_csrf.getToken()}">
+            @endif
+            <button type="submit">Salir</button>
+        </form>
     </body>
 </html>
