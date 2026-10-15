@@ -1,5 +1,6 @@
 package com.kinetix.cattlestock.web;
 
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.YearMonth;
@@ -13,19 +14,26 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.kinetix.cattlestock.app.LedgerService;
+import com.kinetix.cattlestock.app.PlanillaExcelExporter;
 import com.kinetix.cattlestock.data.EstablishmentEntity;
 import com.kinetix.cattlestock.data.EstablishmentRepository;
 import com.kinetix.cattlestock.domain.DomainException;
+import com.kinetix.cattlestock.domain.Planilla;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 public class PlanillaController {
 
     private final LedgerService service;
     private final EstablishmentRepository establishments;
+    private final PlanillaExcelExporter excelExporter;
 
-    public PlanillaController(LedgerService service, EstablishmentRepository establishments) {
+    public PlanillaController(LedgerService service, EstablishmentRepository establishments,
+                              PlanillaExcelExporter excelExporter) {
         this.service = service;
         this.establishments = establishments;
+        this.excelExporter = excelExporter;
     }
 
     @GetMapping("/planilla")
@@ -50,6 +58,23 @@ public class PlanillaController {
             }
         }
         return "planilla";
+    }
+
+    @GetMapping("/planilla/excel")
+    public void excel(@RequestParam String establecimiento, @RequestParam String mes,
+                      HttpServletResponse response) throws IOException {
+        Planilla planilla;
+        try {
+            planilla = service.planilla(establecimiento, YearMonth.parse(mes));
+        } catch (DomainException | DateTimeParseException e) {
+            response.sendRedirect("/planilla?establecimiento=" + establecimiento + "&mes=" + mes
+                    + "&error=" + URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8));
+            return;
+        }
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=planilla-"
+                + establecimiento + "-" + mes + ".xlsx");
+        excelExporter.write(planilla, response.getOutputStream());
     }
 
     @PostMapping("/planilla/cerrar")

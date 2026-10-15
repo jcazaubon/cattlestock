@@ -46,6 +46,7 @@
                     <button type="submit">Cerrar mes</button>
                 </form>
             @endif
+            <p><a href="/planilla/excel?establecimiento=${establecimiento}&mes=${mes}">Descargar Excel</a></p>
             @for (var especie : Species.values())
                 @if (planilla.rows().stream().anyMatch(r -> r.category().species() == especie))
                     <h3>${especie == Species.VACUNOS ? "Vacunos" : especie == Species.YEGUARIZOS ? "Yeguarizos" : "Lanares"}</h3>

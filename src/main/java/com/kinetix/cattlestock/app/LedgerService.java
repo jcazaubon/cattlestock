@@ -106,6 +106,19 @@ public class LedgerService {
         movements.save(toEntity(m));
     }
 
+    /** Agrega todos o ninguno. Sirve para la carga en grilla. */
+    @Transactional
+    public void addBatch(List<Movement> batch) {
+        if (batch.isEmpty()) return;
+        Set<String> codes = new LinkedHashSet<>();
+        for (Movement m : batch) {
+            codes.add(m.establishmentId());
+            if (m.destEstablishmentId() != null) codes.add(m.destEstablishmentId());
+        }
+        ledgerFor(codes).addAll(batch);
+        for (Movement m : batch) movements.save(toEntity(m));
+    }
+
     // --- Consultas ---
 
     @Transactional(readOnly = true)
