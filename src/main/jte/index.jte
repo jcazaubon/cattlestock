@@ -1,4 +1,6 @@
 @param String appName
+@param String mesActual
+@param java.util.List<com.kinetix.cattlestock.data.EstablishmentEntity> establecimientos
 <!DOCTYPE html>
 <html lang="es">
     <head>
@@ -10,7 +12,16 @@
     <body>
         <h1>${appName}</h1>
         <p>Registro de movimientos de hacienda.</p>
-        <button hx-get="/fragment/ping" hx-target="#ping">Ping al servidor</button>
-        <div id="ping"></div>
+        <p><a href="/alta">Cargar movimiento</a></p>
+        <h2>Planillas</h2>
+        @if (establecimientos.isEmpty())
+            <p>No hay establecimientos configurados todavia.</p>
+        @else
+            <ul>
+                @for (var est : establecimientos)
+                    <li><a href="/planilla?establecimiento=${est.getCode()}&mes=${mesActual}">${est.getName()}</a></li>
+                @endfor
+            </ul>
+        @endif
     </body>
 </html>

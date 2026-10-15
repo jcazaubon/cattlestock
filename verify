@@ -1,22 +1,5 @@
 #!/bin/sh
-# Compila el nucleo del dominio (Java puro, sin framework) y corre sus pruebas.
-# Usa el JDK de JAVA_HOME si esta disponible; si no, el javac del PATH.
+# Atajo al check del proyecto: todo corre con Maven.
 set -e
 cd "$(dirname "$0")"
-OUT="${TMPDIR:-/tmp}/cattlestock-out"
-rm -rf "$OUT" && mkdir -p "$OUT"
-FILES="$(find src/main/java/com/kinetix/cattlestock/domain -name '*.java') $(find src/test/java/com/kinetix/cattlestock/domain -name '*.java')"
-if [ -n "$JAVA_HOME" ] && command -v cygpath >/dev/null 2>&1; then
-  JH="$(cygpath -u "$JAVA_HOME")"
-else
-  JH="${JAVA_HOME:-}"
-fi
-if [ -n "$JH" ] && [ -x "$JH/bin/javac" ]; then
-  JAVAC="$JH/bin/javac"
-  JAVA="$JH/bin/java"
-else
-  JAVAC=javac
-  JAVA=java
-fi
-"$JAVAC" -d "$OUT" $FILES
-"$JAVA" -cp "$OUT" com.kinetix.cattlestock.domain.LedgerTest
+./mvnw -ntp test

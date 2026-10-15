@@ -1,7 +1,9 @@
 # Pendiente
 
-- Mover cada metodo de `LedgerTest` a un test de JUnit sin cambiar su contenido, para que las 16 pruebas corran con `./mvnw test` (hoy corren con `./verify` o `verify.cmd`).
-- Persistencia: tablas para establecimientos, categorias, stock inicial, movimientos y cierres de mes. El stock se sigue calculando.
-- `Ledger` recorre todos los movimientos en memoria. Con base de datos hay que consultar por establecimiento, categoria y rango de fechas.
-- La reapertura de un mes debe quedar limitada a administradores en la capa de la aplicacion.
-- Mas adelante: evaluar Laravel 13 con Filament para el panel de administracion y las pantallas. No empezar hasta que el nucleo en Spring Boot tenga persistencia y alta de movimientos.
+- Usuarios y roles: solo ven y cargan en sus establecimientos. La reapertura de mes debe quedar limitada a administradores en la capa de la aplicacion.
+- Carga en grilla: una fecha y varias categorias en una sola pantalla, todo o nada.
+- Exportar la planilla mensual a Excel con el formato actual.
+- Vista general de existencia como pantalla, con filtros por establecimiento, especie y categoria.
+- Pantallas de configuracion de empresa, establecimientos, categorias y stock inicial (hoy hay un seed de datos de prueba provisional).
+- MariaDB real en produccion (config comentada en application.properties).
+- Mas adelante: evaluar Laravel 13 con Filament para el panel de administracion. Ya hay persistencia y alta de movimientos en Spring Boot, decidir antes de seguir sumando pantallas.

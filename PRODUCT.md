@@ -34,6 +34,7 @@ Criterios de aceptación:
 - **La planilla es el formulario mensual de un establecimiento, y se genera a partir de los movimientos.** Nadie escribe celdas de totales a mano. Cada planilla tiene un mes y un estado (abierta o cerrada).
 - **Una planilla por establecimiento y por mes.** Incluye secciones por especie (vacunos, yeguarizos, lanares) dentro de la misma planilla.
 - **Stack: Java y Spring Boot.** Decidido tras comparar con Laravel: es el stack que mejor domina quien lo construye, y el núcleo ya está escrito y probado en Java. El costo de servidor (2 a 4 GB de RAM) no cambia la decisión.
+- **La capa de datos no duplica reglas.** `LedgerService` arma un `Ledger` desde la base (la configuración completa más los movimientos del componente conectado de establecimientos, expandido por traslados) y el dominio valida y calcula. Los cierres se rehacen en orden a partir del estado persistido.
 - **Pantallas con JTE y HTMX.** Renderizado en el servidor con templates type-safe; HTMX da la interactividad y se escribe JS propio solo donde HTMX no alcance (por ejemplo, la grilla de carga rápida).
 - **Base de datos MariaDB** para producción, con H2 embebida para desarrollo y pruebas.
 - **El cierre de una planilla fija la existencia final, que pasa a ser la anterior del mes siguiente.**
@@ -57,14 +58,17 @@ Criterios de aceptación:
 
 ## Estado actual
 
-Funciona y está verificado (16 pruebas con `./verify`, o `verify.cmd` en Windows; build completo con `./mvnw test` en verde): el núcleo del dominio en Java puro, sin framework, ya dentro del proyecto Spring Boot (`com.kinetix.cattlestock.domain`).
+Funciona y está verificado (30 pruebas con `./mvnw test`, atajos `./verify` y `verify.cmd`): el dominio en Java puro dentro del proyecto Spring Boot (`com.kinetix.cattlestock.domain`), con persistencia y pantallas.
 - Libro de movimientos con stock inicial, los siete tipos de movimiento y carga en bloque (todo o nada).
 - Regla de stock negativo, revisada al cierre de cada día, también con movimientos de fecha pasada.
 - Planilla mensual por establecimiento con anterior, columnas, final y totales por especie. El final de un mes es el anterior del siguiente.
 - Cambios de categoría y traslados (con La Marta) como un solo movimiento de dos lados.
 - Cierre de mes en orden, que bloquea la carga en ambos lados de un traslado, y reapertura del último mes.
-- Vista general de existencia con filtros por establecimiento, especie y categoría, a una fecha.
+- Vista general de existencia con filtros por establecimiento, especie y categoría, a una fecha (en el dominio; falta la pantalla).
+- Persistencia JPA (`com.kinetix.cattlestock.data`): empresa, establecimientos, categorías, stock inicial, movimientos y cierres. El stock se sigue calculando, no se guarda.
+- Capa de aplicación (`LedgerService`): arma un Ledger desde la base y delega todas las reglas en el dominio.
+- Pantallas JTE + HTMX: alta de movimientos (formulario con selects dependientes; los errores del dominio se muestran y conservan lo escrito) y planilla mensual con cerrar y reabrir mes. Un seed carga datos de prueba la primera vez.
 
-Falta: persistencia, Spring Boot, usuarios y roles, pantallas (formulario y grilla), exportar a Excel.
+Falta: usuarios y roles, carga en grilla, exportar a Excel, vista general como pantalla, pantallas de configuración (hoy datos de prueba por seed), MariaDB real en producción.
 
-Próximo paso: pasar el núcleo a un proyecto Spring Boot con Maven (en este entorno no hay acceso a Maven Central, así que no se pudo hacer acá), guardar en base de datos y exponer el alta de movimientos y la planilla.
+Próximo paso: carga rápida en grilla (una fecha, varias categorías) o exportación de la planilla a Excel, a elección.

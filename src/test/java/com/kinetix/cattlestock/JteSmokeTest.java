@@ -14,8 +14,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Prueba de humo del cableado JTE + HTMX: la pantalla principal renderiza
- * y el fragmento que consume HTMX responde.
+ * Prueba de humo del cableado JTE: la pantalla principal renderiza con HTMX servido
+ * por la app.
  */
 @SpringBootTest
 class JteSmokeTest {
@@ -36,12 +36,5 @@ class JteSmokeTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("CattleStock")))
                 .andExpect(content().string(containsString("htmx.min.js")));
-    }
-
-    @Test
-    void elFragmentoQueConsumeHtmxResponde() throws Exception {
-        mockMvc.perform(get("/fragment/ping"))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Pong")));
     }
 }
