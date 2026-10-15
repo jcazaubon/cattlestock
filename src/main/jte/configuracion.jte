@@ -4,6 +4,8 @@
 @param String seleccionado
 @param java.util.List<com.kinetix.cattlestock.web.ConfiguracionController.FilaCategoria> filas
 @param java.util.List<com.kinetix.cattlestock.data.UserEntity> usuarios
+@param String usuario
+@param boolean esAdmin
 @param org.springframework.security.web.csrf.CsrfToken _csrf
 <!DOCTYPE html>
 <html lang="es">
@@ -12,22 +14,35 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Configuracion - CattleStock</title>
         <link rel="stylesheet" href="/app.css">
+        <meta name="htmx-config" content='{"globalViewTransitions":true}'>
         <script src="/htmx.min.js"></script>
     </head>
     <body>
         <header class="barra">
             <a class="marca" href="/"><span class="caravana" aria-hidden="true"></span>CattleStock</a>
-            <nav>
+            <nav hx-boost="true">
                 <a href="/alta">Cargar movimiento</a>
                 <a href="/grilla">Carga rapida</a>
                 <a href="/existencia">Existencia</a>
             </nav>
-            <form method="post" action="/logout" class="salir">
-                @if (_csrf != null)
-                    <input type="hidden" name="${_csrf.getParameterName()}" value="${_csrf.getToken()}">
-                @endif
-                <button type="submit">Salir</button>
-            </form>
+            <div class="menu-usuario">
+                <button type="button" class="usuario">
+                    <span class="avatar" aria-hidden="true">${usuario.length() > 0 ? usuario.substring(0, 1).toUpperCase() : "C"}</span>
+                    ${usuario}
+                </button>
+                <div class="menu-usuario-opciones">
+                    @if (esAdmin)
+                        <a href="/configuracion">Configuracion</a>
+                        <div class="separador"></div>
+                    @endif
+                    <form method="post" action="/logout" hx-boost="false">
+                        @if (_csrf != null)
+                            <input type="hidden" name="${_csrf.getParameterName()}" value="${_csrf.getToken()}">
+                        @endif
+                        <button type="submit">Salir</button>
+                    </form>
+                </div>
+            </div>
         </header>
         <main class="contenedor">
             <h1>Configuracion</h1>

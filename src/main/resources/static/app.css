@@ -75,8 +75,96 @@ a:hover { text-decoration: underline; }
 .barra nav a:hover { color: var(--verde-osc); text-decoration: none; }
 
 .barra .salir { margin-left: auto; }
-.barra .salir button { border: 0; background: none; color: var(--tinta-2); cursor: pointer; font: inherit; font-size: .88rem; padding: .2rem .3rem; transition: color var(--transicion); }
-.barra .salir button:hover { color: var(--rojo); }
+
+/* menu de usuario con desplegable */
+.menu-usuario { position: relative; margin-left: auto; }
+
+.usuario {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    padding: .22rem .7rem .22rem .3rem;
+    font: inherit;
+    font-size: .92rem;
+    color: var(--tinta);
+    cursor: pointer;
+    transition: background var(--transicion);
+}
+.usuario:hover { background: var(--papel-2); }
+
+.avatar {
+    width: 1.55rem;
+    height: 1.55rem;
+    border-radius: 5px 10px 5px 5px;
+    background: var(--verde);
+    color: var(--hoja);
+    display: inline-grid;
+    place-items: center;
+    font-weight: 700;
+    font-size: .8rem;
+    flex: none;
+}
+
+.usuario::after {
+    content: "";
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid var(--tinta-2);
+    flex: none;
+}
+
+.menu-usuario-opciones {
+    position: absolute;
+    right: 0;
+    top: calc(100% + .4rem);
+    min-width: 11rem;
+    background: var(--hoja);
+    border: 1px solid var(--linea);
+    border-radius: var(--radio);
+    box-shadow: var(--sombra), 0 6px 10px -6px rgba(33, 39, 33, .2);
+    padding: .35rem;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-4px);
+    transition: opacity var(--transicion), transform var(--transicion), visibility var(--transicion);
+    z-index: 30;
+}
+
+.menu-usuario:hover .menu-usuario-opciones,
+.menu-usuario:focus-within .menu-usuario-opciones {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.menu-usuario-opciones form { margin: 0; }
+
+.menu-usuario-opciones a,
+.menu-usuario-opciones button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: .5rem .65rem;
+    border-radius: 7px;
+    font-size: .92rem;
+    color: var(--tinta);
+    background: none;
+    border: 0;
+    cursor: pointer;
+    font-family: inherit;
+}
+.menu-usuario-opciones a:hover,
+.menu-usuario-opciones button:hover {
+    background: var(--papel-2);
+    text-decoration: none;
+}
+
+.menu-usuario-opciones .separador { border-top: 1px solid var(--linea); margin: .3rem .2rem; height: 0; }
 
 /* ---- layout ---- */
 
@@ -261,17 +349,27 @@ tbody tr:last-child td { border-bottom: 0; }
 }
 .lista-planillas a:hover { border-color: var(--verde); text-decoration: none; transform: translateY(-1px); }
 
-/* ---- login ---- */
+/* ---- login: amanecer en el campo ---- */
 
-.login { display: grid; place-items: center; min-height: 100dvh; padding: 1rem; }
+.login {
+    display: grid;
+    place-items: center;
+    min-height: 100dvh;
+    padding: 1rem;
+    background:
+        radial-gradient(58rem 34rem at 80% -14%, rgba(96, 148, 98, .34), transparent 62%),
+        radial-gradient(46rem 30rem at 10% 112%, rgba(47, 93, 63, .42), transparent 64%),
+        linear-gradient(168deg, #141f18 0%, #1b2e22 46%, #24402e 100%);
+}
 
 .tarjeta-login {
     width: 100%;
     max-width: 22rem;
-    background: var(--hoja);
-    border: 1px solid var(--linea);
-    border-radius: 14px;
-    box-shadow: var(--sombra);
+    background: rgba(255, 253, 248, .88);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, .55);
+    border-radius: 16px;
+    box-shadow: 0 24px 60px -24px rgba(8, 18, 12, .6);
     padding: 2rem 1.8rem;
     text-align: center;
 }
@@ -289,6 +387,32 @@ tbody tr:last-child td { border-bottom: 0; }
 
 .vacio { color: var(--tinta-2); background: var(--papel-2); border: 1px dashed var(--linea-2); border-radius: var(--radio); padding: .9rem 1rem; margin: .8rem 0; }
 
+/* ---- fluides: navegacion, carga y hover ---- */
+
+/* navegacion rapida con htmx: el nav se atenua y muestra una linea de avance */
+.barra nav { position: relative; }
+.barra nav.htmx-request { opacity: .55; pointer-events: none; }
+.barra nav.htmx-request::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -.55rem;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--verde), transparent);
+    animation: palpitar 1s ease-in-out infinite;
+}
+@keyframes palpitar { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
+
+/* los selects que piden fragmentos se atenuan mientras cargan */
+select.htmx-request { opacity: .5; }
+
+/* hover de fila en todas las tablas */
+.tabla-scroll tbody tr:hover { background: var(--verde-tinta); }
+
+/* view transitions cortas para la navegacion */
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: .18s; }
+
 /* ---- responsive ---- */
 
 @media (max-width: 640px) {
@@ -298,5 +422,5 @@ tbody tr:last-child td { border-bottom: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    * { transition: none !important; }
+    * { transition: none !important; animation: none !important; }
 }
