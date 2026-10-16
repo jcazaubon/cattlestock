@@ -57,8 +57,11 @@ public class GrillaController {
     }
 
     @GetMapping("/grilla/filas")
-    public String filas(@RequestParam(required = false) String establecimiento, Model model) {
+    public String filas(@RequestParam(required = false) String establecimiento,
+                        @RequestParam(required = false) Map<String, String> valores,
+                        Model model) {
         model.addAttribute("categorias", categoriasVisibles(establecimiento));
+        model.addAttribute("valores", valores == null ? Map.of() : valores);
         return "fragment/filasGrilla";
     }
 

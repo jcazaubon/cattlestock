@@ -1,5 +1,5 @@
 @param java.util.List<com.kinetix.cattlestock.data.CategoryEntity> categorias
-@param java.util.Map<String, String> valores
+@param java.util.Map<String, String> valores = java.util.Collections.emptyMap()
 @for (var c : categorias)
     <tr>
         <td>${c.getName()}</td>

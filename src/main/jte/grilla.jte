@@ -63,7 +63,7 @@
                 <p>
                     <label>Establecimiento<br>
                         <select name="establecimiento" required
-                                hx-get="/grilla/filas" hx-target="#filas" hx-include="this">
+                                hx-get="/grilla/filas" hx-target="#filas" hx-include="closest form">
                             <option value=""></option>
                             @for (var est : establecimientos)
                                 <option value="${est.getCode()}" selected="${est.getCode().equals(establecimiento)}">${est.getName()}</option>

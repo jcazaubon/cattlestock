@@ -171,6 +171,21 @@ class WebTest {
     }
 
     @Test
+    void elFragmentoDeFilasDeLaGrillaRespondeYConservaLoEscrito() throws Exception {
+        configurar();
+        mockMvc.perform(get("/grilla/filas").param("establecimiento", "P"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("name=\"compra_toros\"")))
+                .andExpect(content().string(containsString("name=\"consumo_toros\"")));
+
+        mockMvc.perform(get("/grilla/filas")
+                        .param("establecimiento", "P")
+                        .param("compra_toros", "7"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("value=\"7\"")));
+    }
+
+    @Test
     void laVistaGeneralMuestraLaExistenciaALaFecha() throws Exception {
         configurar();
         mockMvc.perform(get("/existencia").param("establecimiento", "P").param("fecha", "2026-09-30"))
