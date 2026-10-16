@@ -168,7 +168,7 @@ a:hover { text-decoration: underline; }
 
 /* ---- layout ---- */
 
-.contenedor { max-width: 1180px; margin: 0 auto; padding: 1.5rem 1.1rem 3rem; }
+.contenedor { max-width: 1400px; margin: 0 auto; padding: 1.5rem 1.2rem 3rem; }
 
 h1 { font-size: 1.45rem; font-weight: 650; letter-spacing: -.01em; margin: .2rem 0 1rem; }
 h2 { font-size: 1.12rem; font-weight: 650; margin: 1.8rem 0 .7rem; }
@@ -309,6 +309,7 @@ tbody tr:last-child td { border-bottom: 0; }
    Es la unica tabla compacta (nowrap): es un formulario numerico ancho. */
 
 .planilla th, .planilla td { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.planilla thead th { white-space: normal; }
 
 .planilla th:not(:first-child),
 .planilla td:not(:first-child) { text-align: right; }

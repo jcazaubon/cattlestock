@@ -26,8 +26,8 @@ public class PlanillaExcelExporter {
             Column.VENTA, Column.MORTANDAD, Column.CONSUMO, Column.TRASLADO_SALE, Column.CAMBIO_SALE };
 
     private static final String[] TITULOS = {
-            "Compra", "Nacimiento", "Traslado entra", "Cambio entra",
-            "Venta", "Mortandad", "Consumo", "Traslado sale", "Cambio sale" };
+            "Compra", "Nacimiento", "Transf. A", "Cambio A",
+            "Venta", "Mortandad", "Consumo", "Transf. DE", "Cambio DE" };
 
     public void write(Planilla planilla, OutputStream out) throws IOException {
         try (Workbook wb = new XSSFWorkbook()) {

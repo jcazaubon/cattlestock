@@ -99,13 +99,13 @@
                                         <th>Anterior</th>
                                         <th>Compra</th>
                                         <th>Nacimiento</th>
-                                        <th>Traslado entra</th>
-                                        <th>Cambio entra</th>
+                                        <th>Transf. A</th>
+                                        <th>Cambio A</th>
                                         <th>Venta</th>
                                         <th>Mortandad</th>
                                         <th>Consumo</th>
-                                        <th>Traslado sale</th>
-                                        <th>Cambio sale</th>
+                                        <th>Transf. DE</th>
+                                        <th>Cambio DE</th>
                                         <th>Entradas</th>
                                         <th>Salidas</th>
                                         <th>Final</th>
