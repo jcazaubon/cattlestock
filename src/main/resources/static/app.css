@@ -273,6 +273,53 @@ button { font: inherit; cursor: pointer; }
 .acciones { display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; margin: 1rem 0; }
 .acciones form { margin: 0; }
 
+/* ---- panel unico de la planilla: titulo + filtros + acciones en una sola barra ---- */
+
+.panel-planilla {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .8rem 1.4rem;
+    background: var(--hoja);
+    border: 1px solid var(--linea);
+    border-radius: var(--radio);
+    box-shadow: var(--sombra);
+    padding: .9rem 1.2rem;
+    margin: 0 0 1rem;
+}
+
+.panel-planilla-titulo {
+    margin: 0;
+    font-size: 1.18rem;
+    font-weight: 650;
+    letter-spacing: -.01em;
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+}
+
+.estado-cerrada {
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--rojo);
+    background: var(--rojo-tinta);
+    border-radius: 999px;
+    padding: .18rem .6rem;
+}
+
+/* dentro del panel los filtros van desnudos: el panel ya es la tarjeta */
+.panel-planilla .filtros {
+    background: none;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+}
+
+.panel-planilla .acciones { margin: 0 0 0 auto; }
+
 /* ---- tablas ---- */
 
 .tabla-scroll {

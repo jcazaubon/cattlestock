@@ -1,5 +1,7 @@
 @import com.kinetix.cattlestock.domain.Column
 @import com.kinetix.cattlestock.domain.Species
+@import java.time.format.TextStyle
+@import java.util.Locale
 @param com.kinetix.cattlestock.domain.Planilla planilla
 @param java.util.List<com.kinetix.cattlestock.data.EstablishmentEntity> establecimientos
 @param String establecimiento
@@ -46,48 +48,60 @@
             </div>
         </header>
         <main class="contenedor">
-            <h1>Planilla mensual</h1>
-            <form method="get" action="/planilla" class="filtros">
-                <label>Establecimiento
-                    <select name="establecimiento">
-                        @for (var est : establecimientos)
-                            <option value="${est.getCode()}" selected="${est.getCode().equals(establecimiento)}">${est.getName()}</option>
-                        @endfor
-                    </select>
-                </label>
-                <label>Mes <input type="month" name="mes" value="${mes}"></label>
-                <button type="submit" class="boton boton-linea">Ver</button>
-            </form>
+            <div class="panel-planilla">
+                @if (planilla != null)
+                    <h1 class="panel-planilla-titulo">
+                        ${planilla.establishment().name()} · ${planilla.month().getMonth().getDisplayName(TextStyle.FULL, Locale.forLanguageTag("es"))} ${planilla.month().getYear()}
+                        @if (planilla.closed())
+                            <span class="estado-cerrada">Cerrada</span>
+                        @endif
+                    </h1>
+                @else
+                    <h1 class="panel-planilla-titulo">Planilla mensual</h1>
+                @endif
+                <form method="get" action="/planilla" class="filtros">
+                    <label>Establecimiento
+                        <select name="establecimiento">
+                            @for (var est : establecimientos)
+                                <option value="${est.getCode()}" selected="${est.getCode().equals(establecimiento)}">${est.getName()}</option>
+                            @endfor
+                        </select>
+                    </label>
+                    <label>Mes <input type="month" name="mes" value="${mes}"></label>
+                    <button type="submit" class="boton boton-linea">Ver</button>
+                </form>
+                @if (planilla != null)
+                    <div class="acciones">
+                        @if (planilla.closed())
+                            <form method="post" action="/planilla/reabrir">
+                                <input type="hidden" name="establecimiento" value="${establecimiento}">
+                                <input type="hidden" name="mes" value="${mes}">
+                                @if (_csrf != null)
+                                    <input type="hidden" name="${_csrf.getParameterName()}" value="${_csrf.getToken()}">
+                                @endif
+                                <button type="submit" class="boton boton-linea">Reabrir mes</button>
+                            </form>
+                        @else
+                            <form method="post" action="/planilla/cerrar" onsubmit="return confirm('Cerrar la planilla de ${mes}? Despues de cerrarla no se pueden cargar movimientos de ese mes y solo un administrador puede reabrirla.')">
+                                <input type="hidden" name="establecimiento" value="${establecimiento}">
+                                <input type="hidden" name="mes" value="${mes}">
+                                @if (_csrf != null)
+                                    <input type="hidden" name="${_csrf.getParameterName()}" value="${_csrf.getToken()}">
+                                @endif
+                                <button type="submit" class="boton boton-peligro">Cerrar mes</button>
+                            </form>
+                        @endif
+                        <a class="boton boton-linea" href="/planilla/excel?establecimiento=${establecimiento}&mes=${mes}">Descargar Excel</a>
+                    </div>
+                @endif
+            </div>
             @if (error != null)
                 <p class="error"><strong>${error}</strong></p>
             @endif
+            @if (planilla != null && planilla.closed())
+                <p class="cerrada"><strong>Planilla cerrada.</strong> No se pueden cargar movimientos de este mes. Pedile a un administrador que la reabra si falta algo.</p>
+            @endif
             @if (planilla != null)
-                <h2>${planilla.establishment().name()} - ${planilla.month().toString()}</h2>
-                @if (planilla.closed())
-                    <p class="cerrada"><strong>Planilla cerrada.</strong> No se pueden cargar movimientos de este mes. Pedile a un administrador que la reabra si falta algo.</p>
-                @endif
-                <div class="acciones">
-                    @if (planilla.closed())
-                        <form method="post" action="/planilla/reabrir">
-                            <input type="hidden" name="establecimiento" value="${establecimiento}">
-                            <input type="hidden" name="mes" value="${mes}">
-                            @if (_csrf != null)
-                                <input type="hidden" name="${_csrf.getParameterName()}" value="${_csrf.getToken()}">
-                            @endif
-                            <button type="submit" class="boton boton-linea">Reabrir mes</button>
-                        </form>
-                    @else
-                        <form method="post" action="/planilla/cerrar" onsubmit="return confirm('Cerrar la planilla de ${mes}? Despues de cerrarla no se pueden cargar movimientos de ese mes y solo un administrador puede reabrirla.')">
-                            <input type="hidden" name="establecimiento" value="${establecimiento}">
-                            <input type="hidden" name="mes" value="${mes}">
-                            @if (_csrf != null)
-                                <input type="hidden" name="${_csrf.getParameterName()}" value="${_csrf.getToken()}">
-                            @endif
-                            <button type="submit" class="boton boton-peligro">Cerrar mes</button>
-                        </form>
-                    @endif
-                    <a class="boton boton-linea" href="/planilla/excel?establecimiento=${establecimiento}&mes=${mes}">Descargar Excel</a>
-                </div>
                 @for (var especie : Species.values())
                     @if (planilla.rows().stream().anyMatch(r -> r.category().species() == especie))
                         <h3>${especie == Species.VACUNOS ? "Vacunos" : especie == Species.YEGUARIZOS ? "Yeguarizos" : "Lanares"}</h3>
