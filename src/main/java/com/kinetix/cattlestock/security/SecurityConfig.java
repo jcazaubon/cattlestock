@@ -30,6 +30,7 @@ public class SecurityConfig {
                         .requestMatchers("/login").permitAll()
                         .requestMatchers("/htmx.min.js").permitAll()
                         .requestMatchers("/app.css").permitAll()
+                        .requestMatchers("/error").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/configuracion/**").hasRole("ADMIN")
                         .anyRequest().authenticated())

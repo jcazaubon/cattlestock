@@ -388,6 +388,28 @@ tbody tr:last-child td { border-bottom: 0; }
 
 .vacio { color: var(--tinta-2); background: var(--papel-2); border: 1px dashed var(--linea-2); border-radius: var(--radio); padding: .9rem 1rem; margin: .8rem 0; }
 
+/* ---- pagina de error ---- */
+
+.tarjeta-error {
+    max-width: 30rem;
+    margin: 5rem auto;
+    text-align: center;
+    background: var(--hoja);
+    border: 1px solid var(--linea);
+    border-radius: 16px;
+    box-shadow: var(--sombra);
+    padding: 2.5rem 2rem;
+}
+.tarjeta-error .codigo {
+    font-size: 2.6rem;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    color: var(--verde);
+    margin: 0;
+}
+.tarjeta-error h1 { margin: .2rem 0 .4rem; }
+.tarjeta-error .boton { margin: .2rem .25rem; }
+
 /* ---- fluides: navegacion, carga y hover ---- */
 
 /* navegacion rapida con htmx: el nav se atenua y muestra una linea de avance */

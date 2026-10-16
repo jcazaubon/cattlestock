@@ -1,5 +1,7 @@
 package com.kinetix.cattlestock.web;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
@@ -8,6 +10,8 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -169,14 +173,30 @@ public class AltaController {
             case VENTA -> Movement.venta(id, d, est, cat, q);
             case NACIMIENTO -> Movement.nacimiento(id, d, est, cat, q);
             case CONSUMO -> Movement.consumo(id, d, est, cat, q);
-            case MORTANDAD -> Movement.mortandad(id, d, est, cat, q,
-                    cueros == null || cueros.isBlank() ? 0 : Integer.parseInt(cueros.trim()));
+            case MORTANDAD -> Movement.mortandad(id, d, est, cat, q, cuerosDe(cueros));
             case CAMBIO_CATEGORIA -> Movement.cambioCategoria(id, d, est, cat,
                     texto(destinoCategoria, "Elegi la categoria destino"), q);
             case TRASLADO -> Movement.traslado(id, d, est, cat,
                     texto(destinoEstablecimiento, "Elegi el establecimiento destino"),
                     texto(destinoCategoria, "Elegi la categoria destino"), q);
         };
+    }
+
+    /** Los cueros solo van en mortandad; vienen como texto opcional. */
+    private int cuerosDe(String cueros) {
+        if (cueros == null || cueros.isBlank()) return 0;
+        try {
+            return Integer.parseInt(cueros.trim());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Los cueros deben ser un numero entero");
+        }
+    }
+
+    /** Un envio directo sin todos los campos obligatorios vuelve al formulario con aviso. */
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public String faltaUnCampo(MissingServletRequestParameterException e) {
+        return "redirect:/alta?error=" + URLEncoder
+                .encode("Falto completar un campo obligatorio del formulario: " + e.getParameterName(), StandardCharsets.UTF_8);
     }
 
     private String texto(String valor, String mensajeSiFalta) {

@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.YearMonth;
@@ -219,5 +220,32 @@ class WebTest {
         mockMvc.perform(get("/configuracion"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("pepe")));
+    }
+
+    @Test
+    void mortandadConCuerosNoNumericosAvisaEnEspanolYNoPersiste() throws Exception {
+        configurar();
+        mockMvc.perform(post("/movimientos").with(csrf())
+                        .param("fecha", "2026-09-03")
+                        .param("tipo", "MORTANDAD")
+                        .param("establecimiento", "P")
+                        .param("categoria", "toros")
+                        .param("cantidad", "1")
+                        .param("cueros", "abc"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Los cueros deben ser un numero entero")))
+                .andExpect(content().string(containsString("Cargar movimiento")));
+        org.junit.jupiter.api.Assertions.assertEquals(0, movements.count());
+    }
+
+    @Test
+    void unEnvioSinUnCampoObligatorioVuelveAlFormularioConAviso() throws Exception {
+        mockMvc.perform(post("/movimientos").with(csrf())
+                        .param("fecha", "2026-09-03")
+                        .param("tipo", "COMPRA")
+                        .param("establecimiento", "P")
+                        .param("cantidad", "3"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrlPattern("/alta?error=*"));
     }
 }
