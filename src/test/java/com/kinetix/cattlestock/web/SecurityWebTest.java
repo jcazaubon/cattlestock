@@ -83,10 +83,10 @@ class SecurityWebTest {
         configurar();
         mockMvc.perform(post("/movimientos").with(user("pepe").roles("CARGA")).with(csrf())
                         .param("fecha", "2026-09-03")
-                        .param("tipo", "COMPRA")
                         .param("establecimiento", "LM")
-                        .param("categoria", "vacas")
-                        .param("cantidad", "1"))
+                        .param("categoria0", "vacas")
+                        .param("tipo0", "COMPRA")
+                        .param("cantidad0", "1"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("No podes cargar en LM")));
     }

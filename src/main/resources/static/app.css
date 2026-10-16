@@ -457,6 +457,65 @@ tbody tr:last-child td { border-bottom: 0; }
 .tarjeta-error h1 { margin: .2rem 0 .4rem; }
 .tarjeta-error .boton { margin: .2rem .25rem; }
 
+/* ---- lote de lineas en /alta ---- */
+
+.lote-cabecera {
+    display: flex;
+    align-items: end;
+    gap: .8rem 1.2rem;
+    flex-wrap: wrap;
+    background: var(--hoja);
+    border: 1px solid var(--linea);
+    border-radius: var(--radio);
+    box-shadow: var(--sombra);
+    padding: .9rem 1.2rem;
+    margin: 0 0 .8rem;
+}
+.lote-cabecera label { margin: 0; }
+.lote-cabecera select, .lote-cabecera input { width: auto; min-width: 10rem; }
+
+.linea {
+    display: flex;
+    align-items: end;
+    gap: .6rem .9rem;
+    flex-wrap: wrap;
+    background: var(--hoja);
+    border: 1px solid var(--linea);
+    border-radius: var(--radio);
+    padding: .7rem .9rem;
+    margin: 0 0 .6rem;
+    animation: aparecer 160ms ease-out;
+}
+.linea label { margin: 0; }
+.linea select, .linea input { width: auto; min-width: 9rem; }
+.linea .campo-corto input { width: 6rem; min-width: 6rem; }
+
+.linea-campos { display: flex; align-items: end; gap: .6rem .9rem; flex-wrap: wrap; }
+
+.quitar {
+    margin-left: auto;
+    align-self: end;
+    border: 0;
+    background: none;
+    color: var(--tinta-2);
+    cursor: pointer;
+    font: inherit;
+    font-size: .85rem;
+    padding: .5rem .6rem;
+    border-radius: 7px;
+    transition: color var(--transicion), background var(--transicion);
+}
+.quitar:hover { color: var(--rojo); background: var(--rojo-tinta); }
+
+.lote-pie { display: flex; align-items: end; gap: .7rem .9rem; flex-wrap: wrap; margin-top: .5rem; }
+.lote-pie .nota-lote { flex: 1 1 14rem; margin: 0; }
+.lote-pie .nota-lote input { width: 100%; }
+
+@keyframes aparecer {
+    from { opacity: 0; transform: translateY(-3px); }
+    to { opacity: 1; transform: none; }
+}
+
 /* ---- fluides: navegacion, carga y hover ---- */
 
 /* navegacion rapida con htmx: el nav se atenua y muestra una linea de avance */

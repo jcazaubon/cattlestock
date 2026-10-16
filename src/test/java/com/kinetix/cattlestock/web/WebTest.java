@@ -6,7 +6,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.YearMonth;
@@ -58,12 +57,15 @@ class WebTest {
     }
 
     @Test
-    void laPantallaDeAltaRenderiza() throws Exception {
+    void laPantallaDeAltaRenderizaConUnaLineaYBotonDeAgregar() throws Exception {
         configurar();
         mockMvc.perform(get("/alta"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Cargar movimiento")))
-                .andExpect(content().string(containsString("Principal")));
+                .andExpect(content().string(containsString("Cargar movimientos")))
+                .andExpect(content().string(containsString("Principal")))
+                .andExpect(content().string(containsString("Agregar linea")))
+                .andExpect(content().string(containsString("name=\"categoria0\"")))
+                .andExpect(content().string(containsString("Guardar lote")));
     }
 
     @Test
@@ -71,13 +73,49 @@ class WebTest {
         configurar();
         mockMvc.perform(post("/movimientos").with(csrf())
                         .param("fecha", "2026-09-03")
-                        .param("tipo", "COMPRA")
                         .param("establecimiento", "P")
-                        .param("categoria", "toros")
-                        .param("cantidad", "10"))
+                        .param("categoria0", "toros")
+                        .param("tipo0", "COMPRA")
+                        .param("cantidad0", "10"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/planilla?establecimiento=P&mes=2026-09"));
         org.junit.jupiter.api.Assertions.assertEquals(1, movements.count());
+    }
+
+    @Test
+    void unLoteDeLineasSeGuardaCompleto() throws Exception {
+        configurar();
+        mockMvc.perform(post("/movimientos").with(csrf())
+                        .param("fecha", "2026-09-03")
+                        .param("establecimiento", "P")
+                        .param("categoria0", "toros")
+                        .param("tipo0", "COMPRA")
+                        .param("cantidad0", "10")
+                        .param("categoria1", "toros")
+                        .param("tipo1", "NACIMIENTO")
+                        .param("cantidad1", "2"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/planilla?establecimiento=P&mes=2026-09"));
+        org.junit.jupiter.api.Assertions.assertEquals(2, movements.count());
+    }
+
+    @Test
+    void unLoteConUnaLineaInvalidaNoGuardaNadaYConservaLoEscrito() throws Exception {
+        configurar();
+        mockMvc.perform(post("/movimientos").with(csrf())
+                        .param("fecha", "2026-09-03")
+                        .param("establecimiento", "P")
+                        .param("categoria0", "toros")
+                        .param("tipo0", "COMPRA")
+                        .param("cantidad0", "10")
+                        .param("categoria1", "toroseng")
+                        .param("tipo1", "VENTA")
+                        .param("cantidad1", "1"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Stock insuficiente")))
+                .andExpect(content().string(containsString("value=\"10\"")))
+                .andExpect(content().string(containsString("name=\"cantidad1\"")));
+        org.junit.jupiter.api.Assertions.assertEquals(0, movements.count());
     }
 
     @Test
@@ -85,13 +123,13 @@ class WebTest {
         configurar();
         mockMvc.perform(post("/movimientos").with(csrf())
                         .param("fecha", "2026-09-03")
-                        .param("tipo", "VENTA")
                         .param("establecimiento", "P")
-                        .param("categoria", "toroseng")
-                        .param("cantidad", "1"))
+                        .param("categoria0", "toroseng")
+                        .param("tipo0", "VENTA")
+                        .param("cantidad0", "1"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Stock insuficiente")))
-                .andExpect(content().string(containsString("Cargar movimiento")));
+                .andExpect(content().string(containsString("Cargar movimientos")));
         org.junit.jupiter.api.Assertions.assertEquals(0, movements.count());
     }
 
@@ -100,10 +138,10 @@ class WebTest {
         configurar();
         mockMvc.perform(post("/movimientos").with(csrf())
                         .param("fecha", "2026-09-03")
-                        .param("tipo", "COMPRA")
                         .param("establecimiento", "P")
-                        .param("categoria", "toros")
-                        .param("cantidad", "10"))
+                        .param("categoria0", "toros")
+                        .param("tipo0", "COMPRA")
+                        .param("cantidad0", "10"))
                 .andExpect(status().is3xxRedirection());
 
         mockMvc.perform(get("/planilla").param("establecimiento", "P").param("mes", "2026-09"))
@@ -143,15 +181,33 @@ class WebTest {
     }
 
     @Test
-    void alCambiarElOrigenElDestinoNuncaOfreceElOrigen() throws Exception {
+    void alElegirTrasladoElDestinoNuncaOfreceElOrigen() throws Exception {
         configurar();
-        mockMvc.perform(get("/alta/origen")
+        mockMvc.perform(get("/alta/campos-de-linea")
                         .param("establecimiento", "P")
-                        .param("tipo", "TRASLADO"))
+                        .param("categoria0", "toros")
+                        .param("tipo0", "TRASLADO"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("name=\"destinoEstablecimiento\"")))
+                .andExpect(content().string(containsString("name=\"destinoEstablecimiento0\"")))
                 .andExpect(content().string(containsString("La Marta")))
                 .andExpect(content().string(org.hamcrest.Matchers.not(containsString("value=\"P\""))));
+    }
+
+    @Test
+    void elBotonDeAgregarLineaTraeUnaLineaNuevaYElCambioDeEstablecimientoResetea() throws Exception {
+        configurar();
+        mockMvc.perform(get("/alta/linea")
+                        .param("establecimiento", "P")
+                        .param("tipo0", ""))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("name=\"categoria1\"")))
+                .andExpect(content().string(containsString("id=\"linea-1\"")));
+
+        mockMvc.perform(get("/alta/lineas").param("establecimiento", "LM"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("name=\"categoria0\"")))
+                .andExpect(content().string(containsString("Vacas")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(containsString("categoria1"))));
     }
 
     @Test
@@ -159,12 +215,12 @@ class WebTest {
         configurar();
         mockMvc.perform(post("/movimientos").with(csrf())
                         .param("fecha", "2026-09-03")
-                        .param("tipo", "TRASLADO")
                         .param("establecimiento", "P")
-                        .param("categoria", "toros")
-                        .param("destinoEstablecimiento", "P")
-                        .param("destinoCategoria", "toroseng")
-                        .param("cantidad", "1"))
+                        .param("categoria0", "toros")
+                        .param("tipo0", "TRASLADO")
+                        .param("destinoEstablecimiento0", "P")
+                        .param("destinoCategoria0", "toroseng")
+                        .param("cantidad0", "1"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("El traslado debe ser a otro establecimiento")));
         org.junit.jupiter.api.Assertions.assertEquals(0, movements.count());
@@ -242,25 +298,37 @@ class WebTest {
         configurar();
         mockMvc.perform(post("/movimientos").with(csrf())
                         .param("fecha", "2026-09-03")
-                        .param("tipo", "MORTANDAD")
                         .param("establecimiento", "P")
-                        .param("categoria", "toros")
-                        .param("cantidad", "1")
-                        .param("cueros", "abc"))
+                        .param("categoria0", "toros")
+                        .param("tipo0", "MORTANDAD")
+                        .param("cantidad0", "1")
+                        .param("cueros0", "abc"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Los cueros deben ser un numero entero")))
-                .andExpect(content().string(containsString("Cargar movimiento")));
+                .andExpect(content().string(containsString("Cargar movimientos")));
         org.junit.jupiter.api.Assertions.assertEquals(0, movements.count());
     }
 
     @Test
-    void unEnvioSinUnCampoObligatorioVuelveAlFormularioConAviso() throws Exception {
+    void unEnvioSinFechaVuelveAlFormularioConAvisoYLoEscrito() throws Exception {
+        mockMvc.perform(post("/movimientos").with(csrf())
+                        .param("establecimiento", "P")
+                        .param("categoria0", "toros")
+                        .param("tipo0", "COMPRA")
+                        .param("cantidad0", "3"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Elegi la fecha")))
+                .andExpect(content().string(containsString("value=\"3\"")));
+    }
+
+    @Test
+    void unEnvioSinLineasAvisaYNoGuardaNada() throws Exception {
+        configurar();
         mockMvc.perform(post("/movimientos").with(csrf())
                         .param("fecha", "2026-09-03")
-                        .param("tipo", "COMPRA")
-                        .param("establecimiento", "P")
-                        .param("cantidad", "3"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrlPattern("/alta?error=*"));
+                        .param("establecimiento", "P"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("No escribiste ninguna linea para guardar")));
+        org.junit.jupiter.api.Assertions.assertEquals(0, movements.count());
     }
 }
