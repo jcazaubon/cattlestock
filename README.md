@@ -51,3 +51,8 @@ Las pantallas viven en `src/main/jte` (fragmentos HTMX en `src/main/jte/fragment
 
 - **Wiki del repo**: guía de uso pantalla por pantalla y detalles de arquitectura
 - **PRODUCT.md**: definición del producto, decisiones y estado actual
+
+## Licencia
+
+[MIT](LICENSE) — libre de usar, copiar y modificar, conservando el aviso de copyright.
+
