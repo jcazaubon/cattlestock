@@ -20,12 +20,22 @@ Cada establecimiento tiene su propio catálogo de categorías (agrupadas por esp
 ```powershell
 git clone https://github.com/jcazaubon/cattlestock.git
 cd cattlestock
+docker compose up -d             # levanta MariaDB 11 en el puerto 3307
 .\mvnw.cmd spring-boot:run      # en Linux/Mac: ./mvnw spring-boot:run
 ```
 
 Abrir http://localhost:8080 y entrar con **admin / admin**.
 
-La primera vez, el seed crea la empresa de prueba con dos establecimientos (Principal y La Marta), sus categorías, el stock inicial y el usuario admin. La base de desarrollo es H2 en archivo (`./data/cattlestock`) con consola en `/h2-console`. Para producción con MariaDB, descomentar la configuración de `src/main/resources/application.properties`.
+La primera vez, el seed crea la empresa de prueba con dos establecimientos (Principal y La Marta), sus categorías, el stock inicial y el usuario admin.
+
+## Base de datos
+
+- **Por defecto: MariaDB en Docker** (`docker-compose.yml`), en el puerto **3307** para no chocar con un MySQL local. El volumen `cattlestock-mariadb` persiste los datos entre reinicios; `docker compose down -v` borra todo para empezar de cero con datos reales.
+- **Sin Docker: H2 en archivo** con el perfil `local` (base en `./data/cattlestock`, consola en `/h2-console`):
+  ```powershell
+  .\mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=local
+  ```
+- Las pruebas corren siempre sobre H2 en memoria.
 
 ## Pruebas
 

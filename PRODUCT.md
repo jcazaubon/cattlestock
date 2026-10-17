@@ -36,7 +36,7 @@ Criterios de aceptación:
 - **Stack: Java y Spring Boot.** Decidido tras comparar con Laravel: es el stack que mejor domina quien lo construye, y el núcleo ya está escrito y probado en Java. El costo de servidor (2 a 4 GB de RAM) no cambia la decisión.
 - **La capa de datos no duplica reglas.** `LedgerService` arma un `Ledger` desde la base (la configuración completa más los movimientos del componente conectado de establecimientos, expandido por traslados) y el dominio valida y calcula. Los cierres se rehacen en orden a partir del estado persistido.
 - **Pantallas con JTE y HTMX.** Renderizado en el servidor con templates type-safe; HTMX da la interactividad y se escribe JS propio solo donde HTMX no alcance (por ejemplo, la grilla de carga rápida).
-- **Base de datos MariaDB** para producción, con H2 embebida para desarrollo y pruebas.
+- **Base de datos MariaDB.** Por defecto en Docker (`docker compose up -d`, puerto 3307 para no chocar con un MySQL local); perfil `local` para H2 en archivo; pruebas en H2 en memoria.
 - **El cierre de una planilla fija la existencia final, que pasa a ser la anterior del mes siguiente.**
 - **"LM" es La Marta, otro establecimiento de la misma empresa.** Sus entradas y salidas son traslados, no compras ni ventas.
 - **La primera versión imita el formato de las planillas actuales.** Los usuarios ya lo conocen. Si la app no se les parece, siguen con Excel.
@@ -66,6 +66,6 @@ Funciona y está verificado (46 pruebas con `./mvnw test`, atajos `./verify` y `
 - Pantallas JTE + HTMX (`web`): alta de movimientos, carga rápida en grilla (todo o nada), planilla mensual con cerrar y reabrir, vista general de existencia con filtros, configuración completa (empresa, establecimientos, categorías, stock inicial, usuarios) y exportación a Excel con POI.
 - Seguridad: login propio, todo autenticado, configuración solo para administradores; el usuario de carga solo ve y carga en sus establecimientos; la reapertura de mes queda solo para admin.
 
-Falta: MariaDB real en producción (config lista y comentada) y desplegar en un servidor.
+Falta: desplegar en un servidor. La app ya corre sobre MariaDB (Docker en desarrollo con `docker compose up -d`, o H2 en archivo con el perfil `local`).
 
-Próximo paso: desplegarlo en un servidor con MariaDB y cargar la planilla real de octubre.
+Próximo paso: desplegarlo en un servidor y cargar la planilla real.
