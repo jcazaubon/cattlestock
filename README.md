@@ -28,7 +28,7 @@ Abrir http://localhost:8080 y entrar con **admin / admin**.
 
 La primera vez, el seed crea la empresa de prueba con dos establecimientos (Principal y La Marta), sus categorías, el stock inicial y el usuario admin.
 
-**Antes de publicar el sistema** cambiá la clave inicial del superadmin: definí la variable de entorno `CATTLESTOCK_ADMIN_PASSWORD` antes del primer arranque (o cambiala después). Con la clave por defecto el arranque deja un aviso en el log. Detrás de HTTPS agregá también `server.servlet.session.cookie.secure=true`.
+**Antes de publicar el sistema** seguí la lista de [DEPLOY.md](DEPLOY.md): clave del superadmin (`CATTLESTOCK_ADMIN_PASSWORD`), credenciales de la base, HTTPS, proxy y copias de seguridad.
 
 ## Base de datos
 

@@ -358,7 +358,7 @@ public class ConfiguracionController {
                                @RequestParam String rol,
                                @RequestParam(required = false) List<String> establecimientos) {
         try {
-            userService.crear(texto(username, "Escribi el usuario"), password, rolDe(rol), empresa(),
+            userService.crearConClaveTemporal(texto(username, "Escribi el usuario"), password, rolDe(rol), empresa(),
                     propios(establecimientos));
         } catch (DomainException | IllegalArgumentException e) {
             return conError("usuarios", e.getMessage());

@@ -154,7 +154,7 @@ class MultiempresaTest {
     void elAdminCreaUsuariosEnSuEmpresaYLesAsignaRol() throws Exception {
         configurar();
         mockMvc.perform(post("/configuracion/usuarios").with(user("adminnorte").roles("ADMIN")).with(csrf())
-                        .param("username", "lucia").param("password", "x").param("rol", "CARGA")
+                        .param("username", "lucia").param("password", "clave-segura-1").param("rol", "CARGA")
                         .param("establecimientos", "N1"))
                 .andExpect(status().is3xxRedirection());
         UserEntity lucia = users.findByUsername("lucia").orElseThrow();
@@ -391,7 +391,7 @@ class MultiempresaTest {
         configurar();
         mockMvc.perform(post("/admin/empresas").with(user("root").roles("SUPERADMIN")).with(csrf())
                         .param("nombre", "Ganadera Este").param("mesInicial", "2026-10")
-                        .param("adminUsuario", "adminestes").param("adminPassword", "secreto"))
+                        .param("adminUsuario", "adminestes").param("adminPassword", "secreto-123"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin"));
         CompanyEntity este = companies.findAllByOrderByNameAsc().stream()
@@ -403,7 +403,7 @@ class MultiempresaTest {
         // un usuario repetido vuelve al panel con el aviso
         mockMvc.perform(post("/admin/empresas").with(user("root").roles("SUPERADMIN")).with(csrf())
                         .param("nombre", "Ganadera Oeste").param("mesInicial", "2026-10")
-                        .param("adminUsuario", "adminestes").param("adminPassword", "otro"))
+                        .param("adminUsuario", "adminestes").param("adminPassword", "otro-secreto1"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin?error=El+usuario+adminestes+ya+existe"));
 

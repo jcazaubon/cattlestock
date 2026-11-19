@@ -38,5 +38,5 @@
                 destinoCategoria = linea.destinoCategoria(), cueros = linea.cueros(),
                 categorias = categorias, establecimientos = establecimientos, destinoCategorias = destinoCategorias)
     </div>
-    <button type="button" class="quitar" title="Quitar esta linea" onclick="this.closest('.linea').remove()">Quitar</button>
+    <button type="button" class="quitar" title="Quitar esta linea">Quitar</button>
 </div>

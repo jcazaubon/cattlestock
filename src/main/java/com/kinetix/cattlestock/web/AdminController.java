@@ -84,7 +84,8 @@ public class AdminController {
     @PostMapping("/admin/superadmins")
     public String crearSuperadmin(@RequestParam String username, @RequestParam String password) {
         try {
-            userService.crearSuperadmin(texto(username, "Escribi el usuario"), password);
+            userService.crearConClaveTemporal(texto(username, "Escribi el usuario"), password,
+                    UserEntity.Role.SUPERADMIN, null, java.util.List.of());
         } catch (DomainException | IllegalArgumentException e) {
             return conError(e.getMessage());
         }

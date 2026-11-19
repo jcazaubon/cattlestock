@@ -24,7 +24,7 @@ public class AdminService {
     @Transactional
     public Long altaEmpresa(String nombre, YearMonth mesInicial, String adminUsuario, String adminPassword) {
         Long id = ledger.createCompany(nombre, mesInicial);
-        users.crear(adminUsuario, adminPassword, UserEntity.Role.ADMIN, id, List.of());
+        users.crearConClaveTemporal(adminUsuario, adminPassword, UserEntity.Role.ADMIN, id, List.of());
         return id;
     }
 }

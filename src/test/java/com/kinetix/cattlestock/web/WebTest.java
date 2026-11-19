@@ -425,7 +425,7 @@ class WebTest {
         configurar();
         mockMvc.perform(post("/configuracion/usuarios").with(csrf())
                         .param("username", "pepe")
-                        .param("password", "secreto")
+                        .param("password", "secreto-123")
                         .param("rol", "CARGA")
                         .param("establecimientos", "P"))
                 .andExpect(status().is3xxRedirection());

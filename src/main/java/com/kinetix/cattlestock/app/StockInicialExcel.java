@@ -115,6 +115,7 @@ public class StockInicialExcel {
 
     public Lectura leer(byte[] datos, List<EstablishmentEntity> establecimientos,
                         List<CategoryEntity> categorias) throws IOException {
+        ArchivoExcel.exigir(datos);
         try (Workbook libro = WorkbookFactory.create(new ByteArrayInputStream(datos))) {
             Sheet hoja = libro.getSheet(HOJA);
             if (hoja == null) hoja = libro.getSheetAt(0);

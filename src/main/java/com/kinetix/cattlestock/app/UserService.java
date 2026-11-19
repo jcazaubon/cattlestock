@@ -37,6 +37,54 @@ public class UserService {
         crear(username, password, UserEntity.Role.SUPERADMIN, null, List.of());
     }
 
+    /** Largo minimo de una clave y maximo que BCrypt distingue (72 bytes). */
+    public static final int CLAVE_MINIMA = 8;
+    public static final int CLAVE_MAXIMA = 72;
+
+    /** Falla si la clave no cumple la politica: minimo 8 caracteres, y distinta del nombre de usuario. */
+    public static void validarClave(String clave, String usuario) {
+        if (clave == null || clave.length() < CLAVE_MINIMA) {
+            throw new DomainException("La contraseña tiene que tener al menos " + CLAVE_MINIMA + " caracteres");
+        }
+        if (clave.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > CLAVE_MAXIMA) {
+            throw new DomainException("La contraseña es demasiado larga (máximo " + CLAVE_MAXIMA + " caracteres)");
+        }
+        if (usuario != null && clave.equalsIgnoreCase(usuario)) {
+            throw new DomainException("La contraseña no puede ser igual al usuario");
+        }
+    }
+
+    /**
+     * Crea un usuario con la clave que le da el administrador: tiene que cumplir la politica y el usuario la
+     * cambia en su primer ingreso.
+     */
+    @Transactional
+    public void crearConClaveTemporal(String username, String password, UserEntity.Role role, Long companyId,
+                                      Collection<String> establishmentCodes) {
+        validarClave(password, username);
+        crear(username, password, role, companyId, establishmentCodes);
+        users.findByUsername(username).ifPresent(u -> {
+            u.setMustChangePassword(true);
+            users.save(u);
+        });
+    }
+
+    /** Cambia la clave de un usuario, que tiene que conocer la actual. Ya no se le vuelve a pedir cambiarla. */
+    @Transactional
+    public void cambiarClave(String username, String actual, String nueva) {
+        UserEntity u = users.findByUsername(username).orElseThrow(() -> new DomainException("El usuario no existe"));
+        if (actual == null || !passwordEncoder.matches(actual, u.getPassword())) {
+            throw new DomainException("La contraseña actual no es correcta");
+        }
+        validarClave(nueva, username);
+        if (passwordEncoder.matches(nueva, u.getPassword())) {
+            throw new DomainException("La contraseña nueva tiene que ser distinta de la actual");
+        }
+        u.setPassword(passwordEncoder.encode(nueva));
+        u.setMustChangePassword(false);
+        users.save(u);
+    }
+
     /**
      * Crea un usuario. El superadmin no lleva empresa; el administrador y el de carga pertenecen a una
      * empresa, y sus establecimientos tienen que ser de esa misma empresa.

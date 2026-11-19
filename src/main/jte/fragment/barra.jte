@@ -48,8 +48,9 @@
             @endif
             @if (esAdmin)
                 <a href="/configuracion">Configuración</a>
-                <div class="separador"></div>
             @endif
+            <a href="/cuenta/clave">Cambiar contraseña</a>
+            <div class="separador"></div>
             <form method="post" action="/logout" hx-boost="false">
                 @if (_csrf != null)
                     <input type="hidden" name="${_csrf.getParameterName()}" value="${_csrf.getToken()}">
@@ -73,3 +74,4 @@
 <script src="/menus.js" defer></script>
 <script src="/periodo.js" defer></script>
 <script src="/pestanas.js" defer></script>
+<script src="/lineas.js" defer></script>

@@ -24,8 +24,13 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, UserRepository users, IntentosDeLogin intentos)
+            throws Exception {
         http
+                .addFilterBefore(new LimiteDeLoginFilter(intentos),
+                        org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(new CambioDeClaveFilter(users),
+                        org.springframework.security.web.access.intercept.AuthorizationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login").permitAll()
                         .requestMatchers("/htmx.min.js").permitAll()
@@ -38,11 +43,41 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/", false)
+                        .successHandler(alEntrar(intentos))
+                        .failureHandler(alFallar(intentos))
                         .permitAll())
                 .logout(logout -> logout.logoutSuccessUrl("/login?logout"))
-                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.sameOrigin())
+                        .contentSecurityPolicy(csp -> csp.policyDirectives(
+                                "default-src 'self'; script-src 'self'; "
+                                + "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+                                + "font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; "
+                                + "object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"))
+                        .referrerPolicy(ref -> ref.policy(
+                                org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter
+                                        .ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)));
         return http.build();
+    }
+
+    /** Entrar bien borra los fallos del usuario y lleva a donde queria ir (o al inicio). */
+    private static org.springframework.security.web.authentication.AuthenticationSuccessHandler alEntrar(
+            IntentosDeLogin intentos) {
+        var base = new org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler();
+        base.setDefaultTargetUrl("/");
+        return (request, response, authentication) -> {
+            intentos.exito(authentication.getName());
+            base.onAuthenticationSuccess(request, response, authentication);
+        };
+    }
+
+    /** Un intento fallido cuenta contra el usuario y la direccion, y vuelve al login con el aviso. */
+    private static org.springframework.security.web.authentication.AuthenticationFailureHandler alFallar(
+            IntentosDeLogin intentos) {
+        return (request, response, excepcion) -> {
+            intentos.fallo(request.getRemoteAddr(), request.getParameter("username"));
+            response.sendRedirect(request.getContextPath() + "/login?error");
+        };
     }
 
     @Bean

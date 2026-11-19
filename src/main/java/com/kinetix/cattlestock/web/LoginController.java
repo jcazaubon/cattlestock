@@ -11,8 +11,11 @@ public class LoginController {
     @GetMapping("/login")
     public String login(Model model,
                          @RequestParam(required = false) String error,
-                         @RequestParam(required = false) String logout) {
-        model.addAttribute("error", error != null ? "Usuario o password incorrectos." : null);
+                         @RequestParam(required = false) String logout,
+                         @RequestParam(required = false) String bloqueado) {
+        model.addAttribute("error", bloqueado != null
+                ? "Demasiados intentos fallidos. Esperá 15 minutos antes de volver a intentar."
+                : error != null ? "Usuario o contraseña incorrectos." : null);
         model.addAttribute("salio", logout != null);
         return "login";
     }

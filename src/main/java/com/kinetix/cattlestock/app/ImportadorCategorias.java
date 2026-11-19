@@ -67,6 +67,7 @@ public class ImportadorCategorias {
     }
 
     private Lectura deExcel(byte[] datos) throws IOException {
+        ArchivoExcel.exigir(datos);
         try (Workbook libro = WorkbookFactory.create(new ByteArrayInputStream(datos))) {
             for (int i = libro.getNumberOfSheets() - 1; i >= 0; i--) {
                 List<String> nombres = deHoja(libro.getSheetAt(i));
