@@ -43,7 +43,7 @@
                         @endfor
                     </select>
                 </label>
-                <label>Mes <input type="month" name="mes" value="${mes}"></label>
+                @template.fragment.periodo(nombre = "mes", valor = mes)
                 <label>Categoría
                     <select name="cat">
                         <option value="">Todas</option>

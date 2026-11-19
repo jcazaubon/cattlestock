@@ -75,7 +75,7 @@
                     <input type="hidden" name="${_csrf.getParameterName()}" value="${_csrf.getToken()}">
                 @endif
                 <label>Nombre<input name="nombre" required></label>
-                <label>Mes inicial<input type="month" name="mesInicial" required></label>
+                @template.fragment.periodo(nombre = "mesInicial", valor = "")
                 <label>Usuario del administrador<input name="adminUsuario" required></label>
                 <label>Contraseña<input type="password" name="adminPassword" required></label>
                 <button type="submit" class="boton">Crear empresa</button>

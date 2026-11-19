@@ -51,7 +51,10 @@ class PeriodoYFechaTest {
         String esperado = DiasHabiles.porDefecto(YearMonth.now(), java.time.LocalDate.now()).toString();
         mockMvc.perform(get("/alta").with(admin()))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("<input type=\"month\" name=\"periodo\" value=\"" + YearMonth.now() + "\"")))
+                .andExpect(content().string(containsString("<input type=\"hidden\" id=\"periodo-periodo\" name=\"periodo\" value=\"" + YearMonth.now() + "\"")))
+                .andExpect(content().string(containsString("aria-label=\"Mes del período\"")))
+                .andExpect(content().string(containsString("aria-label=\"Año del período\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(containsString("type=\"month\""))))
                 .andExpect(content().string(containsString("id=\"fecha\" name=\"fecha\" value=\"" + esperado + "\"")))
                 // cambiar el periodo pide la fecha nueva y el resto de la pantalla se entera
                 .andExpect(content().string(containsString("hx-get=\"/campo-fecha\"")))

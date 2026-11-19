@@ -40,10 +40,7 @@
                     <input type="hidden" name="${_csrf.getParameterName()}" value="${_csrf.getToken()}">
                 @endif
                 <div class="lote-cabecera">
-                    <label>Período
-                        <input type="month" name="periodo" value="${periodo}" aria-label="Período (mes y año)"
-                               hx-get="/campo-fecha" hx-target="#fecha" hx-swap="outerHTML" hx-trigger="change" hx-include="this">
-                    </label>
+                    @template.fragment.periodo(nombre = "periodo", valor = periodo, actualizaFecha = true)
                     <label>Fecha
                         @template.fragment.campoFecha(fecha = fecha.isEmpty() ? fechaPorDefecto : fecha)
                     </label>

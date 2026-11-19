@@ -42,10 +42,7 @@
                 @endif
                 <div class="lote-cabecera"
                      hx-get="/alta/disponible" hx-trigger="change, fecha-actualizada from:body" hx-target="#disponible" hx-include="closest form" hx-swap="innerHTML">
-                    <label>Período
-                        <input type="month" name="periodo" value="${periodo}" aria-label="Período (mes y año)"
-                               hx-get="/campo-fecha" hx-target="#fecha" hx-swap="outerHTML" hx-trigger="change" hx-include="this">
-                    </label>
+                    @template.fragment.periodo(nombre = "periodo", valor = periodo, actualizaFecha = true)
                     <label>Fecha
                         @template.fragment.campoFecha(fecha = fecha.isEmpty() ? fechaPorDefecto : fecha)
                     </label>

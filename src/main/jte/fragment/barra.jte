@@ -72,3 +72,4 @@
 </dialog>
 <script src="/confirmar.js" defer></script>
 <script src="/menus.js" defer></script>
+<script src="/periodo.js" defer></script>
