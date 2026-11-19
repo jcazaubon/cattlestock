@@ -33,16 +33,6 @@
         @template.fragment.barra(usuario = usuario, esAdmin = esAdmin, esSuperadmin = esSuperadmin, empresaNombre = empresaNombre, empresasMenu = empresasMenu, empresaActivaId = empresaActivaId, ruta = ruta, _csrf = _csrf)
         <main class="contenedor">
             <div class="panel-planilla">
-                @if (planilla != null)
-                    <h1 class="panel-planilla-titulo">
-                        ${planilla.establishment().name()} · ${planilla.month().getMonth().getDisplayName(TextStyle.FULL, Locale.forLanguageTag("es"))} ${planilla.month().getYear()}
-                        @if (planilla.closed())
-                            <span class="estado-cerrada">Cerrada</span>
-                        @endif
-                    </h1>
-                @else
-                    <h1 class="panel-planilla-titulo">Planilla mensual</h1>
-                @endif
                 <form method="get" action="/planilla" class="filtros">
                     <label>Establecimiento
                         <select name="establecimiento">
@@ -95,6 +85,16 @@
                     </div>
                 @endif
             </div>
+            @if (planilla != null)
+                <h1 class="titulo-resultado">
+                    ${planilla.establishment().name()} · ${planilla.month().getMonth().getDisplayName(TextStyle.FULL, Locale.forLanguageTag("es"))} ${planilla.month().getYear()}
+                    @if (planilla.closed())
+                        <span class="estado-cerrada">Cerrada</span>
+                    @endif
+                </h1>
+            @else
+                <h1 class="titulo-resultado">Planilla mensual</h1>
+            @endif
             @if (error != null)
                 <p class="error"><strong>${error}</strong></p>
             @endif
@@ -127,15 +127,15 @@
                                         <th scope="col">Anterior</th>
                                         <th scope="col" class="ent${vacias[0] ? " col-vacia" : ""}">Compra</th>
                                         <th scope="col" class="ent${vacias[1] ? " col-vacia" : ""}">Nacimiento</th>
-                                        <th scope="col" class="ent${vacias[2] ? " col-vacia" : ""}">Transf. A</th>
-                                        <th scope="col" class="ent${vacias[3] ? " col-vacia" : ""}">Cambio A</th>
+                                        <th scope="col" class="ent${vacias[2] ? " col-vacia" : ""}">Transf. DE</th>
+                                        <th scope="col" class="ent${vacias[3] ? " col-vacia" : ""}">Cambio DE</th>
                                         <th scope="col" class="ent${vacias[4] ? " col-vacia" : ""}">Dif. recuento +</th>
                                         <th scope="col" class="sal${vacias[5] ? " col-vacia" : ""}">Venta</th>
                                         <th scope="col" class="sal${vacias[6] ? " col-vacia" : ""}">Mortandad</th>
                                         <th scope="col" class="sal${vacias[7] ? " col-vacia" : ""}">Consumo</th>
                                         <th scope="col" class="sal${vacias[8] ? " col-vacia" : ""}">Pastoreo</th>
-                                        <th scope="col" class="sal${vacias[9] ? " col-vacia" : ""}">Transf. DE</th>
-                                        <th scope="col" class="sal${vacias[10] ? " col-vacia" : ""}">Cambio DE</th>
+                                        <th scope="col" class="sal${vacias[9] ? " col-vacia" : ""}">Transf. A</th>
+                                        <th scope="col" class="sal${vacias[10] ? " col-vacia" : ""}">Cambio A</th>
                                         <th scope="col" class="sal${vacias[11] ? " col-vacia" : ""}">Dif. recuento -</th>
                                         <th scope="col" class="ent${vacias[12] ? " col-vacia" : ""}">Entradas</th>
                                         <th scope="col" class="sal${vacias[13] ? " col-vacia" : ""}">Salidas</th>
@@ -192,10 +192,10 @@
                 @endfor
                 <p class="total-general">Total general: anterior <strong>${planilla.totalGeneral().anterior()}</strong>, entradas <strong>${planilla.totalGeneral().entradas()}</strong>, salidas <strong>${planilla.totalGeneral().salidas()}</strong>, final <strong>${planilla.totalGeneral().finalStock()}</strong></p>
                 <dl class="leyenda">
-                    <div><dt>Transf. A</dt><dd>entran por traslado desde otro establecimiento</dd></div>
-                    <div><dt>Transf. DE</dt><dd>salen por traslado hacia otro establecimiento</dd></div>
-                    <div><dt>Cambio A</dt><dd>entran a la categoría por cambio de categoría</dd></div>
-                    <div><dt>Cambio DE</dt><dd>salen de la categoría por cambio de categoría</dd></div>
+                    <div><dt>Transf. DE</dt><dd>entran por traslado desde otro establecimiento</dd></div>
+                    <div><dt>Transf. A</dt><dd>salen por traslado hacia otro establecimiento</dd></div>
+                    <div><dt>Cambio DE</dt><dd>entran a la categoría por cambio de categoría</dd></div>
+                    <div><dt>Cambio A</dt><dd>salen de la categoría por cambio de categoría</dd></div>
                     <div><dt>Dif. recuento +/-</dt><dd>ajustes por recuento, a favor o en contra</dd></div>
                 </dl>
             @endif

@@ -36,8 +36,8 @@ public class PlanillaPdfExporter {
             Column.CAMBIO_SALE, Column.RECUENTO_MENOS };
 
     private static final String[] TITULOS = {
-            "Compra", "Nacim.", "Transf. A", "Cambio A", "Dif. rec. +",
-            "Venta", "Mortand.", "Consumo", "Pastoreo", "Transf. DE", "Cambio DE", "Dif. rec. -" };
+            "Compra", "Nacim.", "Transf. DE", "Cambio DE", "Dif. rec. +",
+            "Venta", "Mortand.", "Consumo", "Pastoreo", "Transf. A", "Cambio A", "Dif. rec. -" };
 
     private static final int ENTRADAS = 5;
 

@@ -308,7 +308,8 @@ td.accion { width: 1%; text-align: right; white-space: nowrap; }
 .panel-planilla { display: flex; align-items: flex-end; flex-wrap: wrap; gap: .8rem 1.4rem; margin: 0 0 1rem; padding: .85rem 1.2rem; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio-grande); }
 .panel-planilla .filtros { margin: 0; }
 .panel-planilla .acciones { margin: 0 0 0 auto; align-items: flex-end; }
-.panel-planilla-titulo { display: flex; align-items: center; gap: .6rem; margin: 0; padding-bottom: .5rem; font-size: 1.3rem; }
+/* El titulo del resultado va debajo del filtro: recien dice qué planilla se está viendo cuando se aplicó el filtro */
+.titulo-resultado { display: flex; align-items: center; gap: .6rem; margin: 0 0 .8rem; font-size: 1.3rem; }
 .estado-cerrada { padding: .12rem .55rem; background: var(--tinta); border-radius: var(--radio); color: var(--superficie); font-size: .85rem; font-weight: 600; }
 
 /* ---- existencia ---- */

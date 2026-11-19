@@ -85,10 +85,22 @@ class PlanillaLegibleTest {
     }
 
     @Test
+    void deIndicaLoQueEntraYAIndicaLoQueSale() throws Exception {
+        configurar();
+        String html = planilla();
+        assertTrue(Pattern.compile("class=\"ent[^\"]*\">Transf[.] DE</th>").matcher(html).find()
+                && Pattern.compile("class=\"ent[^\"]*\">Cambio DE</th>").matcher(html).find(),
+                "DE (desde otro establecimiento o categoria) va en las entradas");
+        assertTrue(Pattern.compile("class=\"sal[^\"]*\">Transf[.] A</th>").matcher(html).find()
+                && Pattern.compile("class=\"sal[^\"]*\">Cambio A</th>").matcher(html).find(),
+                "A (hacia otro establecimiento o categoria) va en las salidas");
+    }
+
+    @Test
     void laLeyendaExplicaLasAbreviaturas() throws Exception {
         configurar();
         mockMvc.perform(get("/planilla").param("establecimiento", "N1").param("mes", "2026-09").with(admin()))
-                .andExpect(content().string(containsString("<dt>Transf. DE</dt>")))
+                .andExpect(content().string(containsString("<dt>Transf. A</dt>")))
                 .andExpect(content().string(containsString("salen por traslado hacia otro establecimiento")))
                 .andExpect(content().string(containsString("<dt>Dif. recuento +/-</dt>")));
     }

@@ -40,8 +40,8 @@ public class PlanillaExcelExporter {
             Column.CAMBIO_SALE, Column.RECUENTO_MENOS };
 
     private static final String[] TITULOS = {
-            "Compra", "Nacimiento", "Transf. A", "Cambio A", "Dif. recuento +",
-            "Venta", "Mortandad", "Consumo", "Pastoreo", "Transf. DE", "Cambio DE", "Dif. recuento -" };
+            "Compra", "Nacimiento", "Transf. DE", "Cambio DE", "Dif. recuento +",
+            "Venta", "Mortandad", "Consumo", "Pastoreo", "Transf. A", "Cambio A", "Dif. recuento -" };
 
     /** Las primeras columnas de entrada son las 5 primeras de movimiento; las demas son de salida. */
     private static final int ENTRADAS = 5;
