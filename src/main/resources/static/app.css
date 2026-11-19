@@ -1,562 +1,692 @@
-/* CattleStock - estilo de planilla impresa.
-   Tokens: papel y tinta de registro, verde campo como unico acento,
-   rojo de correccion solo para salidas y rechazos. */
+/* CattleStock.
+   Interfaz de trabajo: superficies blancas con borde de 1px sobre un fondo neutro, un solo acento amarillo
+   (el de la caravana) para la accion principal y para lo que importa, verde para lo que entra y rojo para lo
+   que sale. Sin degradados, sin sombras marcadas, sin movimiento decorativo. */
+
+@import url("https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap");
 
 :root {
-    --papel: #f5f3ec;
-    --papel-2: #faf8f1;
-    --hoja: #fffdf8;
-    --tinta: #212721;
-    --tinta-2: #5a6156;
-    --linea: #dfdacb;
-    --linea-2: #b7b09c;
-    --verde: #2f5d3f;
-    --verde-osc: #234830;
-    --verde-tinta: #e6efe4;
-    --rojo: #a4392d;
-    --rojo-tinta: #f8e9e3;
-    --radio: 10px;
-    --sombra: 0 1px 2px rgba(33, 39, 33, .05), 0 10px 28px -14px rgba(33, 39, 33, .18);
-    --transicion: 150ms ease-out;
+    --fondo: #f1f4ef;
+    --superficie: #ffffff;
+    --suave: #f6f8f4;
+    --hover: #eef2ec;
+    --tinta: #14262b;
+    --tinta-2: #4b5d60;
+    --borde: #d6ddd3;
+    --borde-fuerte: #aab7ad;
+
+    --acento: #f2b705;
+    --acento-osc: #d9a200;
+    --acento-suave: #fdf3cc;
+
+    --verde: #1f6a43;
+    --verde-osc: #17512f;
+    --verde-suave: #e3f0e6;
+    --rojo: #b3342a;
+    --rojo-suave: #fbeae7;
+
+    --radio: 6px;
+    --radio-grande: 8px;
+    --alto-control: 2.5rem;
+    --alto-tabla: 2.1rem;
+    --sombra: 0 2px 8px rgba(20, 38, 43, .08);
+    --transicion: 120ms ease;
+
+    --ui: "Barlow", system-ui, sans-serif;
+    --numeros: "Barlow Semi Condensed", "Barlow", system-ui, sans-serif;
 }
 
 * { box-sizing: border-box; }
 
 body {
     margin: 0;
-    background: var(--papel);
+    background: var(--fondo);
     color: var(--tinta);
-    font: 15px/1.55 -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font: 16px/1.5 var(--ui);
+    -webkit-font-smoothing: antialiased;
 }
 
 a { color: var(--verde); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
-:focus-visible { outline: 2px solid var(--verde); outline-offset: 1px; }
+:focus-visible { outline: 2px solid var(--tinta); outline-offset: 2px; }
+
+h1 { font-size: 1.6rem; font-weight: 700; line-height: 1.2; margin: .2rem 0 1rem; }
+h2 { font-size: 1.2rem; font-weight: 700; margin: 1.8rem 0 .7rem; }
+h3 { font-size: 1.1rem; font-weight: 700; margin: 1.6rem 0 .3rem; }
+p { margin: .5rem 0; }
 
 /* ---- barra superior ---- */
 
 .barra {
     display: flex;
     align-items: center;
-    gap: 1.1rem;
-    flex-wrap: wrap;
-    background: var(--hoja);
-    border-bottom: 1px solid var(--linea);
-    padding: .55rem 1.1rem;
+    gap: 1.5rem;
+    height: 3.25rem;
+    padding: 0 1.25rem;
+    background: var(--superficie);
+    border-bottom: 1px solid var(--borde-fuerte);
     position: sticky;
     top: 0;
     z-index: 20;
 }
 
-.marca {
-    display: inline-flex;
+.marca { display: inline-flex; align-items: center; gap: .55rem; font-weight: 700; font-size: 1.05rem; color: var(--tinta); }
+.marca:hover { text-decoration: none; }
+
+/* la caravana: chapita de oreja, de la marca */
+.caravana { position: relative; width: .8rem; height: 1.1rem; border-radius: 3px; background: var(--acento); flex: none; }
+.caravana::after { content: ""; position: absolute; top: .2rem; left: 50%; width: .2rem; height: .2rem; margin-left: -.1rem; border-radius: 50%; background: var(--tinta); }
+
+.barra nav { display: flex; align-self: stretch; gap: .25rem; }
+.barra nav a {
+    display: flex;
     align-items: center;
-    gap: .5rem;
-    font-weight: 700;
-    letter-spacing: -.01em;
+    padding: 0 .75rem;
+    margin-bottom: -1px;
+    color: var(--tinta-2);
+    font-weight: 500;
+    border-bottom: 2px solid transparent;
+    transition: color var(--transicion), border-color var(--transicion);
+}
+.barra nav a:hover { color: var(--tinta); text-decoration: none; }
+.barra nav a[aria-current="page"] { color: var(--tinta); font-weight: 600; border-bottom-color: var(--tinta); }
+.barra nav.htmx-request { opacity: .6; pointer-events: none; }
+
+.barra .empresa {
+    margin-left: auto;
+    padding: .2rem .7rem;
+    background: var(--acento-suave);
+    border: 1px solid var(--acento-osc);
+    border-radius: var(--radio);
     color: var(--tinta);
-    font-size: 1.02rem;
+    font: inherit;
+    font-weight: 600;
+    font-size: .92rem;
 }
-.marca:hover { text-decoration: none; color: var(--verde-osc); }
+.barra a.empresa:hover { background: var(--acento); text-decoration: none; }
 
-/* la caravana: marca de ganado */
-.caravana {
-    width: 1.05rem;
-    height: 1.05rem;
-    border-radius: 3px 8px 3px 3px;
-    background: var(--verde);
-    box-shadow: inset 0 0 0 2px var(--hoja), inset 0 0 0 3.5px var(--verde);
-    flex: none;
-}
+/* menus desplegables: la lista de empresas y la del usuario */
+.menu-usuario, .menu-empresa { position: relative; }
+.menu-usuario { margin-left: auto; }
+.barra .empresa ~ .menu-usuario, .barra .menu-empresa ~ .menu-usuario { margin-left: .25rem; }
+.menu-empresa { margin-left: auto; }
 
-.barra nav { display: flex; gap: .9rem; flex-wrap: wrap; }
-.barra nav a { color: var(--tinta-2); font-size: .92rem; }
-.barra nav a:hover { color: var(--verde-osc); text-decoration: none; }
-
-.barra .salir { margin-left: auto; }
-
-/* menu de usuario con desplegable */
-.menu-usuario { position: relative; margin-left: auto; }
+.menu-empresa .empresa { margin-left: 0; display: inline-flex; align-items: center; gap: .45rem; cursor: pointer; }
+.menu-empresa .empresa::after { content: ""; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid var(--tinta); }
+.menu-empresa .empresa:hover { background: var(--acento); }
 
 .usuario {
     display: inline-flex;
     align-items: center;
-    gap: .45rem;
+    gap: .5rem;
+    padding: .2rem .6rem .2rem .25rem;
     background: none;
     border: 1px solid transparent;
-    border-radius: 999px;
-    padding: .22rem .7rem .22rem .3rem;
-    font: inherit;
-    font-size: .92rem;
+    border-radius: var(--radio);
     color: var(--tinta);
+    font: inherit;
+    font-size: .95rem;
     cursor: pointer;
     transition: background var(--transicion);
 }
-.usuario:hover { background: var(--papel-2); }
+.usuario:hover { background: var(--hover); }
+.usuario::after { content: ""; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid var(--tinta-2); }
 
-.avatar {
-    width: 1.55rem;
-    height: 1.55rem;
-    border-radius: 5px 10px 5px 5px;
-    background: var(--verde);
-    color: var(--hoja);
-    display: inline-grid;
-    place-items: center;
-    font-weight: 700;
-    font-size: .8rem;
-    flex: none;
-}
-
-.usuario::after {
-    content: "";
-    width: 0;
-    height: 0;
-    border-left: 4px solid transparent;
-    border-right: 4px solid transparent;
-    border-top: 5px solid var(--tinta-2);
-    flex: none;
-}
+.avatar { display: inline-grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: var(--radio); background: var(--acento); color: var(--tinta); font-weight: 700; font-size: .85rem; flex: none; }
 
 .menu-usuario-opciones {
     position: absolute;
     right: 0;
-    top: calc(100% + .4rem);
+    top: calc(100% + .35rem);
     min-width: 11rem;
-    background: var(--hoja);
-    border: 1px solid var(--linea);
-    border-radius: var(--radio);
-    box-shadow: var(--sombra), 0 6px 10px -6px rgba(33, 39, 33, .2);
-    padding: .35rem;
+    padding: .3rem;
+    background: var(--superficie);
+    border: 1px solid var(--borde-fuerte);
+    border-radius: var(--radio-grande);
+    box-shadow: var(--sombra);
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-4px);
-    transition: opacity var(--transicion), transform var(--transicion), visibility var(--transicion);
+    transition: opacity var(--transicion), visibility var(--transicion);
     z-index: 30;
 }
-
-.menu-usuario:hover .menu-usuario-opciones,
-.menu-usuario:focus-within .menu-usuario-opciones {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
+.menu-usuario:hover .menu-usuario-opciones, .menu-usuario:focus-within .menu-usuario-opciones,
+.menu-empresa:hover .menu-usuario-opciones, .menu-empresa:focus-within .menu-usuario-opciones,
+.menu-usuario.abierto .menu-usuario-opciones, .menu-empresa.abierto .menu-usuario-opciones { opacity: 1; visibility: visible; }
+/* en pantallas tactiles solo abre el toque (el "hover" queda pegado despues de tocar) */
+@media (hover: none) {
+    .menu-usuario:hover:not(.abierto) .menu-usuario-opciones, .menu-empresa:hover:not(.abierto) .menu-usuario-opciones { opacity: 0; visibility: hidden; }
 }
+.menu-empresa .menu-usuario-opciones { min-width: 16rem; }
 
 .menu-usuario-opciones form { margin: 0; }
-
-.menu-usuario-opciones a,
-.menu-usuario-opciones button {
+.menu-usuario-opciones a, .menu-usuario-opciones button {
     display: block;
     width: 100%;
-    text-align: left;
     padding: .5rem .65rem;
-    border-radius: 7px;
-    font-size: .92rem;
-    color: var(--tinta);
     background: none;
     border: 0;
+    border-radius: var(--radio);
+    color: var(--tinta);
+    font: inherit;
+    font-size: .95rem;
+    text-align: left;
+    white-space: nowrap;
     cursor: pointer;
-    font-family: inherit;
 }
-.menu-usuario-opciones a:hover,
-.menu-usuario-opciones button:hover {
-    background: var(--papel-2);
-    text-decoration: none;
-}
+.menu-usuario-opciones a:hover, .menu-usuario-opciones button:hover { background: var(--hover); text-decoration: none; }
+.menu-usuario-opciones button.activa { font-weight: 700; background: var(--acento-suave); }
+.menu-usuario-opciones .separador { height: 0; margin: .3rem .2rem; border-top: 1px solid var(--borde); }
 
-.menu-usuario-opciones .separador { border-top: 1px solid var(--linea); margin: .3rem .2rem; height: 0; }
+/* ---- estructura de pagina ---- */
 
-/* ---- layout ---- */
+.contenedor { max-width: 1480px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+.config { max-width: 62rem; }
 
-.contenedor { max-width: 1400px; margin: 0 auto; padding: 1.5rem 1.2rem 3rem; }
-
-h1 { font-size: 1.45rem; font-weight: 650; letter-spacing: -.01em; margin: .2rem 0 1rem; }
-h2 { font-size: 1.12rem; font-weight: 650; margin: 1.8rem 0 .7rem; }
-h3 { font-size: .95rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--verde-osc); margin: 1.6rem 0 .5rem; padding-left: .55rem; border-left: 3px solid var(--verde); }
-
-.volver { margin: 0 0 1.1rem; }
-.volver a { color: var(--tinta-2); font-size: .92rem; }
-
-p { margin: .5rem 0; }
-p.introduccion { color: var(--tinta-2); margin-top: -0.6rem; }
+.subtitulo { margin: -.6rem 0 1.25rem; color: var(--tinta-2); }
+.introduccion { margin: -.6rem 0 1rem; color: var(--tinta-2); max-width: 62ch; }
+.ayuda { margin: .3rem 0 .8rem; color: var(--tinta-2); font-size: .92rem; max-width: 62ch; }
+.volver { margin: 0 0 1rem; }
+.volver a { color: var(--tinta-2); font-size: .95rem; }
+.periodo { margin: .3rem 0 .6rem; color: var(--tinta-2); font-size: .92rem; }
 
 /* ---- formularios ---- */
 
 form p { margin: 0 0 .8rem; }
 
-label { display: block; font-size: .85rem; color: var(--tinta-2); margin-bottom: .2rem; }
+/* etiqueta arriba del campo, con aire; los labels con checkbox siguen en fila */
+label { display: flex; flex-direction: column; align-items: flex-start; gap: .4rem; margin-bottom: .2rem; color: var(--tinta-2); font-size: .88rem; font-weight: 500; }
+label br { display: none; }
 
-input, select {
-    font: inherit;
-    color: var(--tinta);
-    background: var(--hoja);
-    border: 1px solid var(--linea-2);
-    border-radius: 8px;
-    padding: .45rem .6rem;
+input, select, textarea {
     max-width: 100%;
-    transition: border-color var(--transicion), box-shadow var(--transicion);
+    padding: .42rem .65rem;
+    background: var(--superficie);
+    border: 1px solid var(--borde-fuerte);
+    border-radius: var(--radio);
+    color: var(--tinta);
+    font: inherit;
+    transition: border-color var(--transicion);
 }
-input:focus, select:focus {
-    outline: none;
-    border-color: var(--verde);
-    box-shadow: 0 0 0 3px var(--verde-tinta);
-}
+input:not([type="checkbox"]):not([type="radio"]), select { height: var(--alto-control); padding-top: 0; padding-bottom: 0; line-height: 1.2; }
+textarea { min-height: 4.5rem; }
+input:hover, select:hover, textarea:hover { border-color: var(--tinta-2); }
+input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--tinta); outline-offset: 1px; }
+/* el selector de archivos: un campo del mismo alto que los demas, con el boton integrado (ver mas abajo) */
+input[type="checkbox"], input[type="radio"] { width: 1rem; height: 1rem; padding: 0; accent-color: var(--tinta); }
 
-/* filtros en linea: seleccion de planilla y existencia */
-.filtros { display: flex; align-items: end; gap: .8rem; flex-wrap: wrap; background: var(--hoja); border: 1px solid var(--linea); border-radius: var(--radio); padding: .8rem .9rem; box-shadow: var(--sombra); }
+.opciones { display: flex; flex-wrap: wrap; gap: .5rem 1.2rem; margin: .3rem 0 .9rem; }
+.opciones label, .opcion-inline { display: inline-flex; flex-direction: row; align-items: center; gap: .4rem; margin: 0; color: var(--tinta); font-size: .92rem; }
+.opcion-inline { align-self: center; }
+
+/* una barra de campos en una sola linea: mismo alto, alineados por abajo */
+.filtros { display: flex; align-items: flex-end; flex-wrap: wrap; gap: .8rem; margin: .6rem 0 1rem; }
 .filtros label { margin: 0; }
 .filtros input, .filtros select { width: auto; min-width: 9rem; }
 .filtros input[type="date"], .filtros input[type="month"] { min-width: 8rem; }
+.filtros input[type="checkbox"] { min-width: 0; }
+.filtros .opciones { margin: 0; align-self: center; }
+.filtros .fila-completa { flex: 1 0 100%; display: flex; align-items: center; flex-wrap: wrap; gap: .6rem 1.2rem; }
+.filtros .fila-completa .boton { margin-left: auto; }
+.rotulo-fila { color: var(--tinta-2); font-size: .88rem; font-weight: 500; }
 
 /* ---- botones ---- */
 
 button { font: inherit; cursor: pointer; }
 
 .boton {
-    display: inline-block;
-    background: var(--verde);
-    color: var(--hoja);
-    border: 1px solid var(--verde);
-    border-radius: 8px;
-    padding: .5rem 1.1rem;
-    font-weight: 600;
-    font-size: .95rem;
-    transition: background var(--transicion), transform var(--transicion);
-}
-.boton:hover { background: var(--verde-osc); text-decoration: none; }
-.boton:active { transform: translateY(1px); }
-
-.boton.boton-linea {
-    background: transparent;
-    color: var(--verde-osc);
-    border: 1px solid var(--linea-2);
-}
-.boton.boton-linea:hover { background: var(--papel-2); border-color: var(--verde); }
-
-.boton.boton-peligro {
-    background: transparent;
-    color: var(--rojo);
-    border: 1px solid var(--linea-2);
-}
-.boton.boton-peligro:hover { background: var(--rojo-tinta); border-color: var(--rojo); }
-
-/* ---- avisos ---- */
-
-.error {
-    background: var(--rojo-tinta);
-    border-left: 3px solid var(--rojo);
-    color: var(--rojo);
-    border-radius: 0 8px 8px 0;
-    padding: .7rem .9rem;
-    margin: .9rem 0;
-}
-
-.aviso {
-    background: var(--hoja);
-    border: 1px solid var(--linea);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--alto-control);
+    padding: 0 1.15rem;
+    background: var(--acento);
+    border: 1px solid var(--acento-osc);
     border-radius: var(--radio);
-    padding: .7rem .9rem;
-    margin: .9rem 0;
-    box-shadow: var(--sombra);
+    color: var(--tinta);
+    font-size: .98rem;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    transition: background var(--transicion), border-color var(--transicion);
 }
+.boton:hover { background: var(--acento-osc); text-decoration: none; }
+.boton-linea { background: var(--superficie); border-color: var(--borde-fuerte); }
+.boton-linea:hover { background: var(--hover); border-color: var(--tinta-2); }
+.boton-peligro { background: var(--superficie); border-color: var(--borde-fuerte); color: var(--rojo); }
+.boton-peligro:hover { background: var(--rojo-suave); border-color: var(--rojo); }
 
-.cerrada {
-    background: var(--papel-2);
-    border-left: 3px solid var(--linea-2);
-    padding: .7rem .9rem;
-    margin: .9rem 0;
-    border-radius: 0 8px 8px 0;
-}
-
-/* ---- filas de acciones ---- */
-
-.acciones { display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; margin: 1rem 0; }
+.acciones { display: flex; align-items: center; flex-wrap: wrap; gap: .7rem; margin: 1rem 0; }
 .acciones form { margin: 0; }
 
-/* ---- panel unico de la planilla: titulo + filtros + acciones en una sola barra ---- */
+/* ---- avisos: borde de 1px y fondo suave ---- */
 
-.panel-planilla {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: .8rem 1.4rem;
-    background: var(--hoja);
-    border: 1px solid var(--linea);
+.error, .aviso, .cerrada, .vacio {
+    margin: .9rem 0;
+    padding: .7rem .9rem;
+    border: 1px solid var(--borde);
     border-radius: var(--radio);
-    box-shadow: var(--sombra);
-    padding: .9rem 1.2rem;
-    margin: 0 0 1rem;
+    background: var(--superficie);
 }
+.error { border-color: var(--rojo); background: var(--rojo-suave); color: #7d221a; }
+.aviso { border-color: var(--verde); background: var(--verde-suave); color: var(--verde-osc); }
+.cerrada { border-color: var(--borde-fuerte); }
+.vacio { color: var(--tinta-2); border-style: dashed; border-color: var(--borde-fuerte); background: none; }
 
-.panel-planilla-titulo {
-    margin: 0;
-    font-size: 1.18rem;
-    font-weight: 650;
-    letter-spacing: -.01em;
-    display: flex;
-    align-items: center;
-    gap: .6rem;
-}
+/* ---- tablas: filas limpias; el cebrado es solo de la planilla, que es densa ---- */
 
-.estado-cerrada {
-    font-size: .72rem;
-    font-weight: 700;
-    letter-spacing: .07em;
-    text-transform: uppercase;
-    color: var(--rojo);
-    background: var(--rojo-tinta);
-    border-radius: 999px;
-    padding: .18rem .6rem;
-}
+.tabla-scroll { margin: .6rem 0 1.2rem; overflow-x: auto; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio-grande); }
+.tabla-scroll.angosta { max-width: 40rem; }
 
-/* dentro del panel los filtros van desnudos: el panel ya es la tarjeta */
-.panel-planilla .filtros {
-    background: none;
-    border: 0;
-    border-radius: 0;
-    box-shadow: none;
-    padding: 0;
-}
-
-.panel-planilla .acciones { margin: 0 0 0 auto; }
-
-/* ---- tablas ---- */
-
-.tabla-scroll {
-    overflow-x: auto;
-    background: var(--hoja);
-    border: 1px solid var(--linea);
-    border-radius: var(--radio);
-    box-shadow: var(--sombra);
-    margin: .6rem 0 1.2rem;
-}
-
-table { border-collapse: collapse; width: 100%; font-size: .92rem; }
-
-th, td {
-    padding: .45rem .65rem;
-    border-bottom: 1px solid var(--linea);
-    text-align: left;
-}
-
-thead th {
-    background: var(--papel);
-    border-bottom: 2px solid var(--tinta);
-    color: var(--tinta-2);
-    font-size: .78rem;
-    font-weight: 600;
-    letter-spacing: .02em;
-}
-
-tbody tr:nth-child(even) { background: var(--papel-2); }
+table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+th, td { padding: .5rem .75rem; border-bottom: 1px solid var(--borde); text-align: left; }
+thead th { border-bottom: 1px solid var(--borde-fuerte); background: var(--suave); color: var(--tinta); font-size: .85rem; font-weight: 600; line-height: 1.2; vertical-align: bottom; }
 tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover { background: var(--hover); }
+tr.elegida, tr.elegida:hover { background: var(--hover); }
+tr.elegida td { font-weight: 600; }
+td.codigo { color: var(--tinta-2); font-variant-numeric: tabular-nums; }
+td.accion { width: 1%; text-align: right; white-space: nowrap; }
 
-/* la planilla: la firma de la casa.
-   Entradas con tinta verde, salidas con tinta roja, regla doble bajo el total.
-   Es la unica tabla compacta (nowrap): es un formulario numerico ancho. */
+.tabla-scroll input:not([type="checkbox"]):not([type="radio"]), .tabla-scroll select, .tabla-scroll .boton { height: var(--alto-tabla); }
 
-.planilla th, .planilla td { font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* la planilla: tinta sobre papel de listado. Entradas en verde, salidas en rojo, la existencia final resaltada.
+   Columnas: 1 categoria, 2 anterior, 3-7 entradas, 8-14 salidas, 15 total entradas, 16 total salidas, 17 final. */
+.planilla th, .planilla td { font-family: var(--numeros); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.planilla td:first-child, .planilla thead th:first-child { font-family: var(--ui); }
 .planilla thead th { white-space: normal; }
+.planilla th:not(:first-child), .planilla td:not(:first-child) { text-align: right; }
+.planilla td { font-size: 1rem; }
+.planilla tbody tr:nth-child(even) { background: var(--suave); }
+.planilla tbody tr:hover { background: var(--hover); }
+.planilla td:nth-child(17) { background: var(--acento-suave); border-left: 1px solid var(--borde-fuerte); font-size: 1.05rem; font-weight: 600; }
+.planilla tbody tr:last-child { background: var(--superficie); border-top: 2px solid var(--tinta); }
+.planilla tbody tr:last-child td { font-weight: 700; border-top: 2px solid var(--tinta); }
+.planilla tbody tr:last-child:hover { background: var(--superficie); }
 
-.planilla th:not(:first-child),
-.planilla td:not(:first-child) { text-align: right; }
+/* panel de la planilla: titulo, filtros y acciones en una barra, alineados por el borde de abajo */
+.panel-planilla { display: flex; align-items: flex-end; flex-wrap: wrap; gap: .8rem 1.4rem; margin: 0 0 1rem; padding: .85rem 1.2rem; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio-grande); }
+.panel-planilla .filtros { margin: 0; }
+.panel-planilla .acciones { margin: 0 0 0 auto; align-items: flex-end; }
+.panel-planilla-titulo { display: flex; align-items: center; gap: .6rem; margin: 0; padding-bottom: .5rem; font-size: 1.3rem; }
+.estado-cerrada { padding: .12rem .55rem; background: var(--tinta); border-radius: var(--radio); color: var(--superficie); font-size: .85rem; font-weight: 600; }
 
-.planilla thead th:nth-child(3), .planilla thead th:nth-child(4),
-.planilla thead th:nth-child(5), .planilla thead th:nth-child(6),
-.planilla thead th:nth-child(12) { background: var(--verde-tinta); color: var(--verde-osc); }
+/* ---- existencia ---- */
 
-.planilla thead th:nth-child(7), .planilla thead th:nth-child(8),
-.planilla thead th:nth-child(9), .planilla thead th:nth-child(10),
-.planilla thead th:nth-child(11), .planilla thead th:nth-child(13) { background: var(--rojo-tinta); color: var(--rojo); }
+.resumen-existencia { margin: 1rem 0 .6rem; }
+.total-linea { margin: 0 0 .7rem; font-size: 1.1rem; }
+.total-linea strong { font-size: 1.6rem; font-family: var(--numeros); font-variant-numeric: tabular-nums; }
+.repartos { display: flex; flex-wrap: wrap; gap: 1rem; }
+.reparto { flex: 1 1 18rem; padding: .7rem 1rem .8rem; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio-grande); }
+.reparto h2 { margin: 0 0 .5rem; font-size: .95rem; }
+.parte { display: grid; grid-template-columns: minmax(6rem, 11rem) 1fr 4.2rem 3rem; align-items: center; gap: .6rem; padding: .18rem 0; font-size: .95rem; }
+.parte .medida { height: .5rem; background: var(--hover); border-radius: 2px; overflow: hidden; }
+.parte .relleno { display: block; height: 100%; background: var(--verde); }
+.parte .cantidad, .parte .pct { text-align: right; font-family: var(--numeros); font-variant-numeric: tabular-nums; }
+.parte .pct { color: var(--tinta-2); }
+.bloque-titulo { margin: 1.4rem 0 .2rem; }
+.total-general { margin: 1rem 0 0; font-size: 1.05rem; }
+.total-general strong { font-family: var(--numeros); font-variant-numeric: tabular-nums; }
 
-/* regla de tinta que separa el final */
-.planilla td:nth-child(14) { border-left: 2px solid var(--tinta); }
+.existencia th:not(:first-child), .existencia td:not(:first-child) { text-align: right; }
+.existencia td:not(:first-child) { font-family: var(--numeros); font-variant-numeric: tabular-nums; }
+.existencia thead th { text-align: right; }
+.existencia thead th:first-child { text-align: left; }
+.existencia td.pct { color: var(--tinta-2); }
+.existencia .col-entra, .existencia thead th.grupo-entra { color: var(--verde-osc); }
+.existencia .col-sale, .existencia thead th.grupo-sale { color: var(--rojo); }
+.existencia thead th.grupo-entra { border-bottom-color: var(--verde); text-align: center; }
+.existencia thead th.grupo-sale { border-bottom-color: var(--rojo); text-align: center; }
+.existencia .subencabezado th { font-size: .8rem; font-weight: 500; border-bottom: 1px solid var(--borde-fuerte); }
+.existencia thead th[rowspan] { vertical-align: bottom; }
+.existencia td.col-final { background: var(--acento-suave); font-weight: 700; font-size: 1.05rem; border-left: 1px solid var(--borde-fuerte); }
+.existencia thead th.col-final { border-left: 1px solid var(--borde-fuerte); font-weight: 700; }
+.existencia tr.seccion th { padding-top: .8rem; background: var(--superficie); font-size: 1rem; border-bottom: 1px solid var(--borde-fuerte); }
+.existencia tr.subtotal td { border-top: 1px solid var(--borde-fuerte); background: var(--suave); font-weight: 600; }
+.existencia tr.total-bloque td { border-top: 2px solid var(--tinta); background: var(--superficie); font-weight: 700; }
 
-/* doble linea contable bajo el total de cada seccion */
-.planilla tbody tr:last-child { border-top: 3px double var(--tinta); background: var(--papel); }
-.planilla tbody tr:last-child td { font-weight: 700; }
+/* ---- carga de movimientos y carga rapida ---- */
 
-/* tablas chicas */
-.existencia td:last-child { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
-
-.grilla input { width: 100%; min-width: 4.2rem; text-align: right; padding: .3rem .4rem; }
-
-/* ---- listas de portada ---- */
-
-.lista-planillas { list-style: none; margin: 0; padding: 0; display: grid; gap: .6rem; max-width: 34rem; }
-.lista-planillas a {
-    display: block;
-    background: var(--hoja);
-    border: 1px solid var(--linea);
-    border-radius: var(--radio);
-    box-shadow: var(--sombra);
-    padding: .75rem 1rem;
-    font-weight: 600;
-    color: var(--tinta);
-    transition: border-color var(--transicion), transform var(--transicion);
-}
-.lista-planillas a:hover { border-color: var(--verde); text-decoration: none; transform: translateY(-1px); }
-
-/* ---- login: amanecer en el campo ---- */
-
-.login {
-    display: grid;
-    place-items: center;
-    min-height: 100dvh;
-    padding: 1rem;
-    background:
-        radial-gradient(58rem 34rem at 80% -14%, rgba(96, 148, 98, .34), transparent 62%),
-        radial-gradient(46rem 30rem at 10% 112%, rgba(47, 93, 63, .42), transparent 64%),
-        linear-gradient(168deg, #141f18 0%, #1b2e22 46%, #24402e 100%);
-}
-
-.tarjeta-login {
-    width: 100%;
-    max-width: 22rem;
-    background: rgba(255, 253, 248, .88);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, .55);
-    border-radius: 16px;
-    box-shadow: 0 24px 60px -24px rgba(8, 18, 12, .6);
-    padding: 2rem 1.8rem;
-    text-align: center;
-}
-.tarjeta-login .marca { justify-content: center; font-size: 1.25rem; }
-.tarjeta-login .caravana { width: 1.3rem; height: 1.3rem; }
-.tarjeta-login .introduccion { color: var(--tinta-2); margin: .4rem 0 1.4rem; }
-.tarjeta-login form { text-align: left; }
-.tarjeta-login form p { text-align: left; }
-.tarjeta-login input { width: 100%; }
-
-/* ---- configuracion ---- */
-
-.opciones { display: flex; gap: .6rem 1.2rem; flex-wrap: wrap; margin: .3rem 0 .9rem; }
-.opciones label { display: inline-flex; align-items: center; gap: .4rem; font-size: .92rem; color: var(--tinta); margin: 0; }
-
-.vacio { color: var(--tinta-2); background: var(--papel-2); border: 1px dashed var(--linea-2); border-radius: var(--radio); padding: .9rem 1rem; margin: .8rem 0; }
-
-/* ---- pagina de error ---- */
-
-.tarjeta-error {
-    max-width: 30rem;
-    margin: 5rem auto;
-    text-align: center;
-    background: var(--hoja);
-    border: 1px solid var(--linea);
-    border-radius: 16px;
-    box-shadow: var(--sombra);
-    padding: 2.5rem 2rem;
-}
-.tarjeta-error .codigo {
-    font-size: 2.6rem;
-    font-weight: 700;
-    letter-spacing: -.02em;
-    color: var(--verde);
-    margin: 0;
-}
-.tarjeta-error h1 { margin: .2rem 0 .4rem; }
-.tarjeta-error .boton { margin: .2rem .25rem; }
-
-/* ---- lote de lineas en /alta ---- */
-
-.lote-cabecera {
-    display: flex;
-    align-items: end;
-    gap: .8rem 1.2rem;
-    flex-wrap: wrap;
-    background: var(--hoja);
-    border: 1px solid var(--linea);
-    border-radius: var(--radio);
-    box-shadow: var(--sombra);
-    padding: .9rem 1.2rem;
-    margin: 0 0 .8rem;
-}
+.lote-cabecera { display: flex; align-items: flex-end; flex-wrap: wrap; gap: .8rem 1.2rem; margin: 0 0 .8rem; padding: .9rem 1.2rem; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio-grande); }
 .lote-cabecera label { margin: 0; }
 .lote-cabecera select, .lote-cabecera input { width: auto; min-width: 10rem; }
 
-.linea {
-    display: flex;
-    align-items: end;
-    gap: .6rem .9rem;
-    flex-wrap: wrap;
-    background: var(--hoja);
-    border: 1px solid var(--linea);
-    border-radius: var(--radio);
-    padding: .7rem .9rem;
-    margin: 0 0 .6rem;
-    animation: aparecer 160ms ease-out;
-}
+.linea { display: flex; align-items: flex-end; flex-wrap: wrap; gap: .6rem .9rem; margin: 0 0 .6rem; padding: .7rem .9rem; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio-grande); animation: aparecer 140ms ease; }
 .linea label { margin: 0; }
 .linea select, .linea input { width: auto; min-width: 9rem; }
 .linea .campo-corto input { width: 6rem; min-width: 6rem; }
-
-.linea-campos { display: flex; align-items: end; gap: .6rem .9rem; flex-wrap: wrap; }
-
-.quitar {
-    margin-left: auto;
-    align-self: end;
-    border: 0;
-    background: none;
-    color: var(--tinta-2);
-    cursor: pointer;
-    font: inherit;
-    font-size: .85rem;
-    padding: .5rem .6rem;
-    border-radius: 7px;
-    transition: color var(--transicion), background var(--transicion);
-}
-.quitar:hover { color: var(--rojo); background: var(--rojo-tinta); }
-
-.lote-pie { display: flex; align-items: end; gap: .7rem .9rem; flex-wrap: wrap; margin-top: .5rem; }
+.linea-campos { display: flex; align-items: flex-end; flex-wrap: wrap; gap: .6rem .9rem; }
+.quitar { height: var(--alto-control); margin-left: auto; padding: 0 .6rem; background: none; border: 0; border-radius: var(--radio); color: var(--tinta-2); font-size: .9rem; transition: color var(--transicion), background var(--transicion); }
+.quitar:hover { background: var(--rojo-suave); color: var(--rojo); }
+.lote-pie { display: flex; align-items: flex-end; flex-wrap: wrap; gap: .7rem .9rem; margin-top: .5rem; }
 .lote-pie .nota-lote { flex: 1 1 14rem; margin: 0; }
 .lote-pie .nota-lote input { width: 100%; }
 
-@keyframes aparecer {
-    from { opacity: 0; transform: translateY(-3px); }
-    to { opacity: 1; transform: none; }
-}
+.grilla input { width: 100%; min-width: 4.2rem; padding: .3rem .4rem; text-align: right; font-family: var(--numeros); font-variant-numeric: tabular-nums; }
+.grilla thead th:last-child { font-weight: 700; border-left: 1px solid var(--borde-fuerte); }
+.grilla td:last-child { background: var(--acento-suave); border-left: 1px solid var(--borde-fuerte); }
 
-/* ---- fluides: navegacion, carga y hover ---- */
+/* animales disponibles en el alta */
+.disponible { margin: 0 0 .8rem; padding: .6rem 1rem .8rem; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio-grande); }
+.disponible summary { padding: .15rem 0; cursor: pointer; }
+.disponible-grupo { margin-top: .5rem; }
+.disponible-especie { margin: 0 0 .2rem; font-size: .95rem; font-weight: 700; }
+.disponible ul { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 0 1.6rem; margin: 0; padding: 0; list-style: none; }
+.disponible li { display: flex; justify-content: space-between; gap: 1rem; padding: .22rem 0; border-bottom: 1px solid var(--borde); }
+.disponible li strong { font-family: var(--numeros); font-variant-numeric: tabular-nums; }
+.disponible li.cero { color: var(--tinta-2); }
+.disponible li.cero strong { font-weight: 500; }
 
-/* navegacion rapida con htmx: el nav se atenua y muestra una linea de avance */
-.barra nav { position: relative; }
-.barra nav.htmx-request { opacity: .55; pointer-events: none; }
-.barra nav.htmx-request::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -.55rem;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--verde), transparent);
-    animation: palpitar 1s ease-in-out infinite;
-}
-@keyframes palpitar { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
+/* ---- portada: lista de planillas ---- */
 
-/* los selects que piden fragmentos se atenuan mientras cargan */
+.lista-planillas { max-width: 34rem; margin: 0; padding: 0; list-style: none; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio-grande); overflow: hidden; }
+.lista-planillas li + li { border-top: 1px solid var(--borde); }
+.lista-planillas a { display: flex; justify-content: space-between; gap: 1rem; padding: .8rem 1rem; color: var(--tinta); font-weight: 600; transition: background var(--transicion); }
+.lista-planillas a:hover { background: var(--hover); text-decoration: none; }
+.lista-planillas .detalle { color: var(--tinta-2); font-weight: 400; font-size: .92rem; }
+
+/* ---- configuracion ---- */
+
+.config h1 { margin-bottom: .2rem; }
+.config h2 { margin: 0 0 .3rem; font-size: 1.15rem; }
+.config h3 { margin: 0 0 .6rem; font-size: 1.05rem; }
+.config h4 { margin: 1.4rem 0 .5rem; font-size: .95rem; }
+
+.pestanas { display: flex; gap: 1.6rem; margin: 0 0 1.5rem; border-bottom: 1px solid var(--borde-fuerte); }
+.pestanas a { margin-bottom: -1px; padding: .55rem .1rem; border-bottom: 2px solid transparent; color: var(--tinta-2); font-weight: 500; transition: color var(--transicion), border-color var(--transicion); }
+.pestanas a:hover { border-bottom-color: var(--borde-fuerte); color: var(--tinta); text-decoration: none; }
+.pestanas a[aria-current="page"] { border-bottom-color: var(--tinta); color: var(--tinta); font-weight: 600; }
+.pestanas .cuenta { margin-left: .4rem; color: var(--tinta-2); font-weight: 400; font-variant-numeric: tabular-nums; }
+
+.config .filtros { margin: .9rem 0 1.25rem; }
+.config .tabla-scroll { margin: 0 0 1.25rem; }
+.config .stock td:last-child { width: 9rem; }
+.config .stock input { width: 100%; text-align: right; }
+
+.panel-detalle { margin: 1.5rem 0 0; padding: 1.1rem 1.25rem 1.25rem; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio-grande); }
+.panel-detalle .filtros { margin: 0 0 .4rem; }
+.panel-detalle .tabla-scroll { margin-bottom: 1rem; overflow: visible; background: none; border: 0; border-radius: 0; }
+.panel-detalle .tabla-scroll thead th { padding-left: 0; padding-right: 0; background: none; }
+.panel-detalle .tabla-scroll tbody td { padding-left: 0; padding-right: 0; }
+
+.usuario-fila { display: flex; align-items: center; flex-wrap: wrap; gap: .6rem 1rem; margin: 0; }
+.usuario-fila .opciones { margin: 0; }
+.usuarios td { vertical-align: middle; }
+.admin-tabla td form { margin: 0; }
+.estado-activa { color: var(--verde-osc); font-weight: 600; }
+
+/* importar categorias */
+.importar { margin: 0 0 1.25rem; }
+.importar summary { display: inline-block; color: var(--verde); font-weight: 600; cursor: pointer; }
+.importar summary:hover { text-decoration: underline; }
+.importar[open] { padding-left: 1rem; border-left: 1px solid var(--borde-fuerte); }
+.importar-tabla td:first-child { width: 5rem; text-align: center; }
+tr.ya-existe td { color: var(--tinta-2); }
+
+/* ---- ingreso y error ---- */
+
+.login { display: grid; place-items: center; min-height: 100dvh; padding: 1rem; }
+.tarjeta-login { width: 100%; max-width: 22rem; padding: 2rem 1.8rem 1.8rem; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio-grande); box-shadow: var(--sombra); text-align: center; }
+.tarjeta-login .marca { justify-content: center; font-size: 1.35rem; }
+.tarjeta-login .introduccion { margin: .4rem 0 1.4rem; max-width: none; }
+.tarjeta-login form, .tarjeta-login form p { text-align: left; }
+.tarjeta-login input { width: 100%; }
+.tarjeta-login .boton { width: 100%; }
+
+.tarjeta-error { max-width: 30rem; margin: 5rem auto; padding: 2.5rem 2rem; background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio-grande); text-align: center; }
+.tarjeta-error .codigo { margin: 0; font-family: var(--numeros); font-size: 2.4rem; font-weight: 700; line-height: 1; }
+.tarjeta-error h1 { margin: .4rem 0; }
+.tarjeta-error .boton { margin: .2rem .25rem; }
+
+/* ---- estados de carga y animacion de las lineas nuevas (solo opacidad) ---- */
+
 select.htmx-request { opacity: .5; }
+@keyframes aparecer { from { opacity: 0; } to { opacity: 1; } }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: .15s; }
 
-/* hover de fila en todas las tablas */
-.tabla-scroll tbody tr:hover { background: var(--verde-tinta); }
+/* ---- pantallas angostas ---- */
 
-/* view transitions cortas para la navegacion */
-::view-transition-old(root), ::view-transition-new(root) { animation-duration: .18s; }
-
-/* pantallas mas angostas: la planilla se apreta y la grilla achica sus numeros
-   para que ninguna tabla necesite scroll horizontal si no es inevitable */
-@media (max-width: 900px) {
-    .planilla th, .planilla td { padding: .35rem .45rem; font-size: .85rem; }
-    .grilla input { min-width: 3.6rem; }
+@media (max-width: 1100px) {
+    .planilla th, .planilla td { padding: .35rem .45rem; }
+    .planilla td { font-size: .92rem; }
+    .planilla thead th { font-size: .78rem; }
 }
-
-/* ---- responsive ---- */
-
+@media (max-width: 900px) { .grilla input { min-width: 3.6rem; } }
 @media (max-width: 640px) {
     .contenedor { padding: 1rem .8rem 2.5rem; }
-    .barra { padding: .5rem .8rem; }
+    .barra { gap: .8rem; padding: 0 .8rem; }
     .filtros input, .filtros select { min-width: 8rem; }
+    .panel-planilla .acciones { margin-left: 0; }
+    .parte { grid-template-columns: 1fr 4.2rem 3rem; }
+    .parte .medida { display: none; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-    * { transition: none !important; animation: none !important; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* ---- importar stock inicial ---- */
+
+.pasos { margin: 1rem 0 0; padding-left: 1.3rem; max-width: 46rem; }
+.pasos li { margin: 0 0 1rem; padding-left: .3rem; }
+.pasos .acciones { margin: .6rem 0 0; }
+.pasos .filtros { margin: .6rem 0 0; }
+.advertencia { margin: .9rem 0; padding: .7rem .9rem; border: 1px solid var(--acento-osc); border-radius: var(--radio); background: var(--acento-suave); }
+.advertencia ul { margin: .4rem 0 0; padding-left: 1.2rem; }
+.stock-previa td.num, .stock-previa th:nth-child(n+3) { text-align: right; font-variant-numeric: tabular-nums; }
+.stock-previa tr.sin-cambio td { color: var(--tinta-2); }
+
+.config .subtitulo { margin-top: 0; }
+
+/* ---- selector de archivos: mismo alto, borde y tipografia que el resto de los campos ---- */
+
+input[type="file"] {
+    width: 100%;
+    max-width: 24rem;
+    height: var(--alto-control);
+    padding: 0 .75rem 0 0;
+    overflow: hidden;
+    background: var(--superficie);
+    color: var(--tinta-2);
+    font: inherit;
+    font-size: .92rem;
+    line-height: calc(var(--alto-control) - 2px);
+    cursor: pointer;
 }
+input[type="file"]::file-selector-button {
+    height: calc(var(--alto-control) - 2px);
+    margin: 0 .75rem 0 0;
+    padding: 0 1rem;
+    background: var(--suave);
+    border: 0;
+    border-right: 1px solid var(--borde-fuerte);
+    border-radius: 0;
+    color: var(--tinta);
+    font: inherit;
+    font-size: .95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transicion);
+}
+input[type="file"]:hover::file-selector-button { background: var(--hover); }
+input[type="file"]:focus-visible { outline: 2px solid var(--tinta); outline-offset: 1px; }
+.filtros input[type="file"] { width: 24rem; }
+@media (max-width: 640px) { .filtros input[type="file"] { width: 100%; } }
+
+/* ---- categorias: botones de accion en la misma fila ---- */
+
+.listado-categorias td.botones { width: 1%; white-space: nowrap; }
+.listado-categorias td.botones { display: table-cell; text-align: right; }
+.listado-categorias td.botones form { display: inline-block; margin: 0 0 0 .35rem; }
+.listado-categorias td.estado { color: var(--tinta-2); }
+.listado-categorias tr.deshabilitada td { color: var(--tinta-2); }
+.listado-categorias tr.deshabilitada td:first-child { text-decoration: line-through; text-decoration-color: var(--borde-fuerte); }
+.edicion-fila { margin: 0; }
+.edicion-fila input { width: 100%; max-width: 26rem; }
+.config .tabla-scroll { overflow-x: auto; }
+
+/* ---- alta: agregar movimientos al lote ---- */
+
+.agregar-linea { display: flex; align-items: center; flex-wrap: wrap; gap: .6rem 1rem; margin: 0 0 1rem; }
+.agregar-linea .ayuda { margin: 0; }
+
+/* ---- historial de movimientos ---- */
+
+.historial th.num, .historial td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.historial td.botones { width: 1%; white-space: nowrap; text-align: right; }
+.historial td.botones form { display: inline-block; margin: 0 0 0 .35rem; }
+.historial input:not([type="checkbox"]), .historial select { width: 100%; min-width: 7rem; }
+.historial td.num input { width: 6.5rem; min-width: 0; }
+.historial td.num input + input { margin-top: .3rem; }
+.historial input[type="date"] { min-width: 9rem; }
+.historial tr.eliminado td:not(.botones) { color: var(--tinta-2); background: var(--suave); }
+.auditoria { display: block; margin-top: .15rem; color: var(--tinta-2); font-size: .8rem; }
+
+/* ---- orden de categorias: botones de subir y bajar ---- */
+
+.boton-icono { width: var(--alto-tabla); padding: 0; font-size: 1rem; }
+.boton:disabled { opacity: .4; cursor: default; }
+.boton:disabled:hover { background: var(--superficie); border-color: var(--borde-fuerte); }
+.listado-categorias td.orden { width: 1%; white-space: nowrap; }
+.listado-categorias td.orden form { display: inline-block; margin: 0 .2rem 0 0; }
+
+/* la fila que se acaba de mover se resalta un momento, para encontrarla en su lugar nuevo */
+@keyframes resaltar { from { background-color: var(--acento-suave); } to { background-color: transparent; } }
+.listado-categorias tr.movida td { animation: resaltar 1.4s ease-out; }
+
+/* ---- dialogo de confirmacion propio de la app: superficie, borde y fundido simple ---- */
+
+.dialogo { width: min(28rem, calc(100% - 2rem)); padding: 0; background: var(--superficie); border: 1px solid var(--borde-fuerte); border-radius: var(--radio-grande); color: var(--tinta); box-shadow: var(--sombra); }
+.dialogo::backdrop { background: rgba(20, 38, 43, .45); }
+.dialogo[open] { animation: aparecer 120ms ease; }
+.dialogo-cuerpo { padding: 1.25rem 1.25rem .5rem; }
+.dialogo-cuerpo h2 { margin: 0 0 .5rem; font-size: 1.1rem; }
+.dialogo-cuerpo p { margin: 0; color: var(--tinta-2); }
+.dialogo-acciones { display: flex; justify-content: flex-end; gap: .6rem; padding: 1rem 1.25rem 1.25rem; }
+.dialogo-acciones .boton { height: var(--alto-control); }
+.boton.boton-peligro-solido { background: var(--rojo); border-color: var(--rojo); color: var(--superficie); }
+.boton.boton-peligro-solido:hover { background: #8f2820; border-color: #8f2820; }
+
+/* ---- botones de solo icono ---- */
+
+.icono { width: 1rem; height: 1rem; flex: none; display: block; }
+.boton.boton-icono { width: var(--alto-tabla); padding: 0; }
+
+/* ---- planilla: ceros apagados, banda Entradas/Salidas, encabezado y categoria fijos ---- */
+
+.planilla td.cero { color: var(--tinta-2); opacity: .45; font-weight: 400; }
+.planilla thead th.ent { color: var(--verde-osc); }
+.planilla thead th.sal { color: var(--rojo); }
+/* la banda del titulo recorre toda la tabla, de punta a punta: sus rotulos van centrados, al medio de su grupo */
+.planilla thead tr.banda th, .planilla thead tr.banda td { height: 1.9rem; padding-block: 0; text-align: center; vertical-align: middle; font-size: .78rem; border-bottom: 1px solid var(--borde); background: var(--suave); }
+.planilla thead tr.banda .lado { border-bottom-color: var(--borde); }
+.planilla thead tr.banda .lado.final { border-left: 1px solid var(--borde-fuerte); background: var(--acento-suave); }
+.planilla thead tr:nth-child(2) th:nth-child(1) { text-align: left; }
+.planilla thead tr:nth-child(2) th:nth-child(1), .planilla thead tr:nth-child(2) th:nth-child(2) { color: var(--tinta); }
+.planilla thead tr.banda th.ent { background: var(--verde-suave); }
+.planilla thead tr.banda th.sal { background: var(--rojo-suave); }
+.planilla thead th.final { border-left: 1px solid var(--borde-fuerte); font-weight: 700; }
+.planilla thead tr.banda th:nth-child(3), .planilla thead tr.banda th:nth-child(4),
+.planilla thead tr:nth-child(2) th:nth-child(8), .planilla thead tr:nth-child(2) th:nth-child(15) { border-left: 1px solid var(--borde-fuerte); }
+.planilla td:nth-child(8), .planilla td:nth-child(15) { border-left: 1px solid var(--borde-fuerte); }
+
+/* la tarjeta de la planilla no tiene scroll propio: crece con sus filas y la pagina es la que se desplaza */
+.tabla-planilla { max-height: none; }
+.planilla thead th { background: var(--superficie); }
+.planilla tbody td:first-child { position: sticky; left: 0; z-index: 1; background: inherit; }
+.planilla tbody tr { background: var(--superficie); }
+.planilla tbody tr:nth-child(even) { background: var(--suave); }
+.planilla thead th:first-child { position: sticky; left: 0; z-index: 3; }
+
+h2.especie { margin: 1.6rem 0 .3rem; font-size: 1.1rem; }
+
+.leyenda { margin: 1.2rem 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: .35rem 1.5rem; color: var(--tinta-2); font-size: .88rem; }
+.leyenda div { display: flex; gap: .5rem; }
+.leyenda dt { font-weight: 600; color: var(--tinta); white-space: nowrap; }
+.leyenda dd { margin: 0; }
+
+/* el cierre del mes queda aparte de las descargas */
+.panel-planilla .acciones .separador-accion { width: 1px; align-self: stretch; background: var(--borde-fuerte); margin-inline: .5rem; }
+
+/* ---- celular: navegacion abajo, al alcance del pulgar, con destinos de 44 px ---- */
+
+@media (max-width: 720px) {
+    body { padding-bottom: 3.75rem; }
+    .barra { gap: .6rem; }
+    .barra nav {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 25;
+        align-self: auto;
+        gap: 0;
+        height: 3.5rem;
+        background: var(--superficie);
+        border-top: 1px solid var(--borde-fuerte);
+    }
+    .barra nav a {
+        flex: 1 1 0;
+        min-width: 0;
+        justify-content: center;
+        align-items: center;
+        padding: .25rem .2rem;
+        margin: 0;
+        border-bottom: 0;
+        border-top: 3px solid transparent;
+        text-align: center;
+        font-size: .76rem;
+        line-height: 1.15;
+    }
+    .barra nav a[aria-current="page"] { border-top-color: var(--acento-osc); background: var(--acento-suave); }
+    .nombre-usuario { display: none; }
+    .barra .empresa { max-width: 9.5rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .menu-usuario-opciones { right: 0; max-width: calc(100vw - 1.6rem); }
+    .menu-empresa .menu-usuario-opciones { min-width: 13rem; }
+    .menu-usuario-opciones a, .menu-usuario-opciones button { padding: .75rem .8rem; }
+    .panel-planilla { padding: .75rem; }
+    .panel-planilla .acciones { width: 100%; }
+    .panel-planilla .acciones .separador-accion { display: none; }
+    .dialogo-acciones .boton { flex: 1; }
+}
+
+@media (max-width: 720px) {
+    .panel-planilla { align-items: stretch; }
+    .panel-planilla .filtros { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; width: 100%; }
+    .panel-planilla .filtros label:first-child { grid-column: 1 / -1; }
+    .panel-planilla .filtros select { width: 100%; min-width: 0; }
+    .panel-planilla .filtros .boton { grid-column: 1 / -1; width: 100%; }
+    .panel-planilla .acciones .boton, .panel-planilla .acciones form { flex: 1 1 auto; }
+    .panel-planilla .acciones form .boton { width: 100%; }
+}
+
+/* ---- celular: la planilla muestra solo lo que se movio ---- */
+
+.solo-movil { display: none; }
+@media (max-width: 720px) {
+    .solo-movil { display: flex; align-items: center; gap: .6rem; margin: 0 0 .8rem; color: var(--tinta-2); font-size: .92rem; }
+    .solo-movil label { display: block; margin: 0; flex: 1; }
+    .solo-movil input { width: 1.2rem; height: 1.2rem; flex: none; }
+    .planilla tr.sin-mov, .planilla .col-vacia { display: none; }
+    main:has(#ver-todas:checked) .planilla tr.sin-mov { display: table-row; }
+    main:has(#ver-todas:checked) .planilla th.col-vacia, main:has(#ver-todas:checked) .planilla td.col-vacia { display: table-cell; }
+    /* sin la banda de grupos (sus anchos no siguen a las columnas ocultas), el color del encabezado marca entradas y salidas */
+    .planilla thead tr.banda { display: none; }
+}
+
+/* ---- bordes continuos: las lineas del encabezado recorren toda la tabla, sin cambiar de color por tramo ---- */
+
+.planilla thead tr.banda th, .planilla thead tr.banda td { border-bottom: 1px solid var(--borde-fuerte); }
+.planilla thead tr:nth-child(2) th { border-bottom: 1px solid var(--borde-fuerte); }
+/* los divisores verticales entre grupos (Anterior | Entradas | Salidas | Totales | Final) atraviesan banda, rotulos y filas */
+.planilla thead tr.banda th:nth-child(2), .planilla thead tr:nth-child(2) th:nth-child(3), .planilla td:nth-child(3) { border-left: 1px solid var(--borde-fuerte); }
+
+/* ---- un solo color para todas las lineas de la planilla (la regla gruesa de Total es la unica excepcion) ---- */
+
+.tabla-planilla { border-color: var(--borde-fuerte); }
+.planilla th, .planilla td { border-bottom-color: var(--borde-fuerte); }
+.planilla tbody tr:last-child td { border-bottom: 0; border-top: 2px solid var(--tinta); }
+.planilla thead tr.banda .lado { border-bottom-color: var(--borde-fuerte); }
+
+/* ---- cifras de la planilla: las entradas en verde y las salidas en rojo; los ceros siguen apagados ---- */
+
+.planilla tbody td:is(:nth-child(n+3):nth-child(-n+7), :nth-child(15)):not(.cero) { color: var(--verde); }
+.planilla tbody td:is(:nth-child(n+8):nth-child(-n+14), :nth-child(16)):not(.cero) { color: var(--rojo); }

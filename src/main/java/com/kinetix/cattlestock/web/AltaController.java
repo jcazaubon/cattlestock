@@ -4,7 +4,9 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -17,10 +19,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.kinetix.cattlestock.app.LedgerService;
 import com.kinetix.cattlestock.data.CategoryEntity;
-import com.kinetix.cattlestock.data.CategoryRepository;
 import com.kinetix.cattlestock.domain.DomainException;
+import com.kinetix.cattlestock.domain.Ledger;
 import com.kinetix.cattlestock.domain.Movement;
 import com.kinetix.cattlestock.domain.MovementType;
+import com.kinetix.cattlestock.domain.Species;
 
 /**
  * Carga de movimientos por lote: una fecha y un establecimiento para todo el lote,
@@ -35,24 +38,39 @@ public class AltaController {
                             String destinoEstablecimiento, String destinoCategoria) {
     }
 
+    /** Animales disponibles: cada categoria con su cantidad, agrupadas por especie. */
+    public record Disponible(String titulo, String fecha, int total, List<Grupo> grupos) {
+    }
+
+    public record Grupo(String especie, List<Item> items) {
+    }
+
+    public record Item(String nombre, int cantidad) {
+    }
+
     private final LedgerService service;
-    private final CategoryRepository categories;
     private final CurrentUser currentUser;
 
-    public AltaController(LedgerService service, CategoryRepository categories, CurrentUser currentUser) {
+    public AltaController(LedgerService service, CurrentUser currentUser) {
         this.service = service;
-        this.categories = categories;
         this.currentUser = currentUser;
     }
 
     @GetMapping("/alta")
     public String alta(Model model,
                        @RequestParam(required = false) String error,
-                       @RequestParam(required = false) Map<String, String> params) {
+                       @RequestParam(required = false) Map<String, String> params,
+                       jakarta.servlet.http.HttpSession sesion) {
         String establecimiento = s(params.get("establecimiento"));
+        if (establecimiento.isBlank() && !params.containsKey("establecimiento")) {
+            establecimiento = EstablecimientoPorDefecto.elegir(currentUser.establecimientos(), sesion);
+        }
         List<LineaForm> lineas = lineasDe(params);
         model.addAttribute("error", error);
         model.addAttribute("hoy", LocalDate.now().toString());
+        java.time.YearMonth periodo = FechaController.periodoDe(params.get("fecha"), params.get("periodo"));
+        model.addAttribute("periodo", periodo.toString());
+        model.addAttribute("fechaPorDefecto", com.kinetix.cattlestock.domain.DiasHabiles.porDefecto(periodo, LocalDate.now()).toString());
         model.addAttribute("establecimiento", establecimiento);
         model.addAttribute("fecha", s(params.get("fecha")));
         model.addAttribute("nota", s(params.get("nota")));
@@ -60,10 +78,19 @@ public class AltaController {
         model.addAttribute("categorias", categoriasVisibles(establecimiento));
         model.addAttribute("establecimientos", currentUser.establecimientos());
         model.addAttribute("destinoCategoriasPorIndice", destinoCategoriasDe(lineas));
+        model.addAttribute("disponible", disponible(establecimiento, s(params.get("fecha"))));
         return "alta";
     }
 
     // --- Fragmentos HTMX ---
+
+    /** Panel de animales disponibles: se refresca al cambiar el establecimiento o la fecha. */
+    @GetMapping("/alta/disponible")
+    public String disponibleFragmento(@RequestParam(required = false) String establecimiento,
+                                      @RequestParam(required = false) String fecha, Model model) {
+        model.addAttribute("disponible", disponible(s(establecimiento), s(fecha)));
+        return "fragment/disponible";
+    }
 
     /** El boton "+" pide una linea nueva con el indice siguiente a las que ya hay. */
     @GetMapping("/alta/linea")
@@ -110,12 +137,13 @@ public class AltaController {
     // --- Guardar el lote ---
 
     @PostMapping("/movimientos")
-    public String registrar(Model model, @RequestParam(required = false) Map<String, String> params) {
+    public String registrar(Model model, @RequestParam(required = false) Map<String, String> params,
+                            jakarta.servlet.http.HttpSession sesion) {
         try {
-            LocalDate d = parseFecha(texto(params.get("fecha"), "Elegi la fecha"));
-            String est = texto(params.get("establecimiento"), "Elegi el establecimiento");
+            LocalDate d = parseFecha(texto(params.get("fecha"), "Elegí la fecha"));
+            String est = texto(params.get("establecimiento"), "Elegí el establecimiento");
             if (!currentUser.puedeAcceder(est)) {
-                throw new IllegalArgumentException("No podes cargar en " + est);
+                throw new IllegalArgumentException("No podés cargar en " + est);
             }
             String nota = notaDe(params.get("nota"));
             List<Movement> lote = new ArrayList<>();
@@ -131,19 +159,20 @@ public class AltaController {
                 throw new IllegalArgumentException("No escribiste ninguna linea para guardar");
             }
             service.addBatch(lote);
+            EstablecimientoPorDefecto.recordar(sesion, est);
             return "redirect:/planilla?establecimiento=" + est + "&mes=" + YearMonth.from(d);
         } catch (DomainException | IllegalArgumentException | DateTimeParseException e) {
-            return alta(model, e.getMessage(), params);
+            return alta(model, e.getMessage(), params, sesion);
         }
     }
 
     // --- Helpers ---
 
     private Movement construir(LocalDate fecha, String establecimiento, LineaForm linea, String nota) {
-        String cat = texto(linea.categoria(), "Elegi la categoria");
+        String cat = texto(linea.categoria(), "Elegí la categoria");
         MovementType t;
         try {
-            t = MovementType.valueOf(texto(linea.tipo(), "Elegi el tipo"));
+            t = MovementType.valueOf(texto(linea.tipo(), "Elegí el tipo"));
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("El tipo no es valido");
         }
@@ -159,10 +188,10 @@ public class AltaController {
         Integer cueros = null;
         switch (t) {
             case MORTANDAD -> cueros = cuerosDe(linea.cueros());
-            case CAMBIO_CATEGORIA -> destinoCategoria = texto(linea.destinoCategoria(), "Elegi la categoria destino");
+            case CAMBIO_CATEGORIA -> destinoCategoria = texto(linea.destinoCategoria(), "Elegí la categoria destino");
             case TRASLADO -> {
-                destinoEstablecimiento = texto(linea.destinoEstablecimiento(), "Elegi el establecimiento destino");
-                destinoCategoria = texto(linea.destinoCategoria(), "Elegi la categoria destino");
+                destinoEstablecimiento = texto(linea.destinoEstablecimiento(), "Elegí el establecimiento destino");
+                destinoCategoria = texto(linea.destinoCategoria(), "Elegí la categoria destino");
             }
             default -> { }
         }
@@ -186,7 +215,7 @@ public class AltaController {
         try {
             return LocalDate.parse(fecha);
         } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("La fecha no es valida");
+            throw new IllegalArgumentException("La fecha no es válida");
         }
     }
 
@@ -244,9 +273,57 @@ public class AltaController {
         return categoriasDe(establecimiento);
     }
 
+    /** El catalogo de la empresa del establecimiento, si el usuario tiene acceso a el. */
     private List<CategoryEntity> categoriasDe(String establecimiento) {
-        if (establecimiento == null || establecimiento.isBlank()) return List.of();
-        return categories.findByEstablishmentCodeOrderByPositionAsc(establecimiento);
+        if (establecimiento == null || establecimiento.isBlank() || !currentUser.puedeAcceder(establecimiento)) {
+            return List.of();
+        }
+        return service.categoriasHabilitadasDe(establecimiento);
+    }
+
+    /**
+     * Todos los animales disponibles a la fecha: los del establecimiento elegido o, si no hay ninguno,
+     * los de todos los establecimientos del usuario sumados por especie y categoria.
+     */
+    private Disponible disponible(String establecimiento, String fecha) {
+        LocalDate asOf;
+        try {
+            asOf = fecha == null || fecha.isBlank() ? LocalDate.now() : LocalDate.parse(fecha);
+        } catch (DateTimeParseException e) {
+            asOf = LocalDate.now();
+        }
+        boolean uno = !establecimiento.isBlank() && currentUser.puedeAcceder(establecimiento);
+        String titulo = uno
+                ? "Disponible en " + currentUser.establecimientos().stream()
+                        .filter(e -> e.getCode().equals(establecimiento)).findFirst()
+                        .map(e -> e.getName()).orElse(establecimiento)
+                : "Disponible en todos los establecimientos";
+        Map<Species, Map<String, int[]>> porEspecie = new EnumMap<>(Species.class);
+        Map<Species, Map<String, String>> nombres = new EnumMap<>(Species.class);
+        int total = 0;
+        List<Ledger.ExistenceRow> filas;
+        try {
+            filas = service.existencia(currentUser.empresaId().orElse(null), asOf, uno ? establecimiento : null, null, null);
+        } catch (DomainException e) {
+            filas = List.of(); // empresa sin configurar: el panel queda vacio y el formulario sigue andando
+        }
+        for (Ledger.ExistenceRow f : filas) {
+            if (!currentUser.puedeAcceder(f.establishment().id())) continue;
+            Species sp = f.category().species();
+            String clave = f.category().name().trim().toLowerCase();
+            porEspecie.computeIfAbsent(sp, k -> new LinkedHashMap<>()).computeIfAbsent(clave, k -> new int[1])[0] += f.quantity();
+            nombres.computeIfAbsent(sp, k -> new LinkedHashMap<>()).putIfAbsent(clave, f.category().name());
+            total += f.quantity();
+        }
+        List<Grupo> grupos = new ArrayList<>();
+        for (var e : porEspecie.entrySet()) {
+            List<Item> items = new ArrayList<>();
+            e.getValue().forEach((clave, q) -> items.add(new Item(nombres.get(e.getKey()).get(clave), q[0])));
+            grupos.add(new Grupo(e.getKey() == Species.VACUNOS ? "Vacunos"
+                    : e.getKey() == Species.YEGUARIZOS ? "Yeguarizos" : "Lanares", items));
+        }
+        return new Disponible(titulo, asOf.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                total, grupos);
     }
 
     private static String s(String valor) {

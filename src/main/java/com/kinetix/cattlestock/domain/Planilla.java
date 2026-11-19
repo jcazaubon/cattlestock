@@ -28,6 +28,23 @@ public record Planilla(Establishment establishment, YearMonth month, boolean clo
     }
 
     public record Totals(int anterior, Map<Column, Integer> columns, int finalStock) {
+        /** Todas las entradas del mes: compras, nacimientos, traslados y cambios que entran, y recuentos a favor. */
+        public int entradas() {
+            return sum(true);
+        }
+
+        /** Todas las salidas del mes. */
+        public int salidas() {
+            return sum(false);
+        }
+
+        private int sum(boolean entrada) {
+            int total = 0;
+            for (Map.Entry<Column, Integer> e : columns.entrySet()) {
+                if (e.getKey().entrada == entrada) total += e.getValue();
+            }
+            return total;
+        }
     }
 
     public Totals totalFor(Species species) {

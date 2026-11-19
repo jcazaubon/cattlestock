@@ -16,7 +16,7 @@
             <p class="introduccion">${detalle}</p>
             <p>
                 @if (codigo == 403)
-                    <a class="boton" href="/login">Iniciar sesion</a>
+                    <a class="boton" href="/login">Iniciar sesión</a>
                 @endif
                 <a class="boton boton-linea" href="/">Volver al inicio</a>
             </p>

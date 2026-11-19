@@ -21,7 +21,7 @@
             @endfor
         </select>
     </label>
-    <label>&rarr; a categoria
+    <label>&rarr; a categoría
         <select name="destinoCategoria${indice}">
             <option value=""></option>
             @for (var c : destinoCategorias)
@@ -30,7 +30,7 @@
         </select>
     </label>
 @elseif (tipo != null && tipo.equals("CAMBIO_CATEGORIA"))
-    <label>&rarr; a categoria
+    <label>&rarr; a categoría
         <select name="destinoCategoria${indice}">
             <option value=""></option>
             @for (var c : categorias)

@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "border-accent-on-rounded",
+        "value": "*",
+        "files": [
+          "src/main/resources/static/app.css"
+        ],
+        "createdAt": "2026-11-19T14:07:15.869Z",
+        "reason": "false positive: .usuario::after is a CSS-triangle caret (transparent side borders), not a card accent border; assessed by Claude, not user-confirmed"
+      }
+    ]
+  }
+}

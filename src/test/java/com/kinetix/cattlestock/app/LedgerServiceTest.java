@@ -38,12 +38,12 @@ class LedgerServiceTest {
     MovementRepository movements;
 
     void configurar() {
-        service.configureCompany("Empresa de prueba", SEP);
-        service.createEstablishment("P", "Principal");
-        service.createCategory("P", "toros", "Toros", Species.VACUNOS);
-        service.createCategory("P", "toroseng", "Toros Engorde", Species.VACUNOS);
-        service.createEstablishment("LM", "La Marta");
-        service.createCategory("LM", "vacas", "Vacas", Species.VACUNOS);
+        Long empresa = service.createCompany("Empresa de prueba", SEP);
+        service.createEstablishment(empresa, "P", "Principal");
+        service.createCategory(service.companyOf("P"), "toros", "Toros", Species.VACUNOS);
+        service.createCategory(service.companyOf("P"), "toroseng", "Toros Engorde", Species.VACUNOS);
+        service.createEstablishment(empresa, "LM", "La Marta");
+        service.createCategory(service.companyOf("LM"), "vacas", "Vacas", Species.VACUNOS);
         service.setOpening("P", "toros", 51);
         service.setOpening("P", "toroseng", 0);
         service.setOpening("LM", "vacas", 5);
@@ -112,10 +112,10 @@ class LedgerServiceTest {
         configurar();
         service.addMovement(Movement.compra(UUID.randomUUID().toString(), LocalDate.of(2026, 9, 3), "P", "toros", 10));
 
-        List<Ledger.ExistenceRow> todas = service.existencia(LocalDate.of(2026, 9, 30), null, null, null);
-        assertEquals(3, todas.size(), "LM y P con todas sus categorias");
+        List<Ledger.ExistenceRow> todas = service.existencia(service.companyOf("P"), LocalDate.of(2026, 9, 30), null, null, null);
+        assertEquals(6, todas.size(), "cada establecimiento tiene las 3 categorias del catalogo de la empresa");
 
-        List<Ledger.ExistenceRow> vacunos = service.existencia(LocalDate.of(2026, 9, 30), "P", Species.VACUNOS, "toros");
+        List<Ledger.ExistenceRow> vacunos = service.existencia(service.companyOf("P"), LocalDate.of(2026, 9, 30), "P", Species.VACUNOS, "toros");
         assertEquals(1, vacunos.size(), "filtro por establecimiento, especie y categoria");
         assertEquals(61, vacunos.get(0).quantity(), "existencia con la compra incluida");
     }
@@ -152,11 +152,33 @@ class LedgerServiceTest {
     }
 
     @Test
-    void unaCategoriaNoPerteneceAOtroEstablecimiento() {
+    void unaCategoriaDeLaEmpresaSeUsaEnCualquierEstablecimiento() {
         configurar();
+        // "toros" se dio de alta una sola vez, para la empresa, y La Marta tambien la puede usar
+        service.addMovement(Movement.compra(UUID.randomUUID().toString(), LocalDate.of(2026, 9, 2), "LM", "toros", 3));
+        assertEquals(3, service.existencia(service.companyOf("LM"), LocalDate.of(2026, 9, 30), "LM", null, "toros")
+                .get(0).quantity());
+        // una categoria que no esta en el catalogo no existe en ningun establecimiento
         DomainException e = assertThrows(DomainException.class, () ->
-                service.addMovement(Movement.compra(UUID.randomUUID().toString(), LocalDate.of(2026, 9, 2), "LM", "toros", 1)));
+                service.addMovement(Movement.compra(UUID.randomUUID().toString(), LocalDate.of(2026, 9, 2), "LM", "inventada", 1)));
         assertTrue(e.getMessage().contains("no existe en"), e.getMessage());
-        assertEquals(0, movements.count(), "no debe quedar guardado");
+    }
+
+    @Test
+    void importarCategoriasEsTodoONadaYSaltaLasQueYaExisten() {
+        configurar();
+        Long empresa = service.companyOf("P");
+        int creadas = service.importCategories(empresa, List.of(
+                new LedgerService.NuevaCategoria("Vaquillonas", Species.VACUNOS),
+                new LedgerService.NuevaCategoria("toros", Species.VACUNOS), // ya existe, sin importar mayusculas
+                new LedgerService.NuevaCategoria("Ovejas", Species.LANARES)));
+        assertEquals(2, creadas);
+        assertEquals(5, service.categoriasDeEmpresa(empresa).size());
+        // importar dos veces el mismo archivo no duplica nada
+        assertEquals(0, service.importCategories(empresa, List.of(
+                new LedgerService.NuevaCategoria("Vaquillonas", Species.VACUNOS))));
+        assertEquals("vaquillonas2", service.codigoCategoriaDisponible(empresa, "Vaquillonas"));
+        // y las nuevas aparecen en todos los establecimientos de la empresa
+        assertEquals(5, service.categoriasDe("LM").size());
     }
 }

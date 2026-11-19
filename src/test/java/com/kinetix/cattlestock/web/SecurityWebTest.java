@@ -45,14 +45,14 @@ class SecurityWebTest {
     UserService userService;
 
     void configurar() {
-        service.configureCompany("Empresa de prueba", SEP);
-        service.createEstablishment("P", "Principal");
-        service.createCategory("P", "toros", "Toros", Species.VACUNOS);
-        service.createEstablishment("LM", "La Marta");
-        service.createCategory("LM", "vacas", "Vacas", Species.VACUNOS);
+        Long empresa = service.createCompany("Empresa de prueba", SEP);
+        service.createEstablishment(empresa, "P", "Principal");
+        service.createCategory(service.companyOf("P"), "toros", "Toros", Species.VACUNOS);
+        service.createEstablishment(empresa, "LM", "La Marta");
+        service.createCategory(service.companyOf("LM"), "vacas", "Vacas", Species.VACUNOS);
         service.setOpening("P", "toros", 51);
-        userService.crear("pepe", "pepe", UserEntity.Role.CARGA, List.of("P"));
-        userService.crear("admin", "admin", UserEntity.Role.ADMIN, List.of());
+        userService.crear("pepe", "pepe", UserEntity.Role.CARGA, empresa, List.of("P"));
+        userService.crearSuperadmin("admin", "admin");
     }
 
     @Test
@@ -88,7 +88,7 @@ class SecurityWebTest {
                         .param("tipo0", "COMPRA")
                         .param("cantidad0", "1"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("No podes cargar en LM")));
+                .andExpect(content().string(containsString("No podés cargar en LM")));
     }
 
     @Test
@@ -107,7 +107,7 @@ class SecurityWebTest {
     void elAdministradorPuedeReabrirUnaPlanilla() throws Exception {
         configurar();
         service.closeMonth("P", SEP);
-        mockMvc.perform(post("/planilla/reabrir").with(user("admin").roles("ADMIN")).with(csrf())
+        mockMvc.perform(post("/planilla/reabrir").with(user("admin").roles("SUPERADMIN")).with(csrf())
                         .param("establecimiento", "P")
                         .param("mes", "2026-09"))
                 .andExpect(status().is3xxRedirection());

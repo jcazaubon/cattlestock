@@ -42,4 +42,31 @@ public class ChromeControllerAdvice {
     public boolean esAdmin() {
         return currentUser.esAdmin();
     }
+
+    /** La ruta pedida, para marcar en la barra la pagina donde se esta. */
+    @ModelAttribute("ruta")
+    public String ruta(HttpServletRequest request) {
+        return request.getRequestURI();
+    }
+
+    @ModelAttribute("esSuperadmin")
+    public boolean esSuperadmin() {
+        return currentUser.esSuperadmin();
+    }
+
+    /** Las empresas entre las que el superadmin puede cambiar. Para el resto, ninguna: no hay nada que elegir. */
+    @ModelAttribute("empresasMenu")
+    public java.util.List<com.kinetix.cattlestock.data.CompanyEntity> empresasMenu() {
+        return currentUser.esSuperadmin() ? currentUser.empresas() : java.util.List.of();
+    }
+
+    @ModelAttribute("empresaActivaId")
+    public Long empresaActivaId() {
+        return currentUser.empresaId().orElse(null);
+    }
+
+    @ModelAttribute("empresaNombre")
+    public String empresaNombre() {
+        return currentUser.empresa().map(c -> c.getName()).orElse("");
+    }
 }

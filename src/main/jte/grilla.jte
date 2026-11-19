@@ -1,6 +1,9 @@
 @param String error
 @param String hoy
+@param String periodo
+@param String fechaPorDefecto
 @param String establecimiento
+@param String especie
 @param String fecha
 @param String nota
 @param java.util.Map<String, String> valores
@@ -8,60 +11,43 @@
 @param java.util.List<com.kinetix.cattlestock.data.CategoryEntity> categorias
 @param String usuario
 @param boolean esAdmin
+@param boolean esSuperadmin
+@param String empresaNombre
+@param java.util.List<com.kinetix.cattlestock.data.CompanyEntity> empresasMenu
+@param Long empresaActivaId
+@param String ruta
 @param org.springframework.security.web.csrf.CsrfToken _csrf
 <!DOCTYPE html>
 <html lang="es">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Carga rapida - CattleStock</title>
+        <title>Carga rápida - CattleStock</title>
         <link rel="stylesheet" href="/app.css">
         <meta name="htmx-config" content='{"globalViewTransitions":true}'>
         <script src="/htmx.min.js"></script>
     </head>
     <body>
-        <header class="barra">
-            <a class="marca" href="/"><span class="caravana" aria-hidden="true"></span>CattleStock</a>
-            <nav hx-boost="true">
-                <a href="/alta">Cargar movimiento</a>
-                <a href="/existencia">Existencia</a>
-            </nav>
-            <div class="menu-usuario">
-                <button type="button" class="usuario">
-                    <span class="avatar" aria-hidden="true">${usuario.length() > 0 ? usuario.substring(0, 1).toUpperCase() : "C"}</span>
-                    ${usuario}
-                </button>
-                <div class="menu-usuario-opciones">
-                    @if (esAdmin)
-                        <a href="/configuracion">Configuracion</a>
-                        <div class="separador"></div>
-                    @endif
-                    <form method="post" action="/logout" hx-boost="false">
-                        @if (_csrf != null)
-                            <input type="hidden" name="${_csrf.getParameterName()}" value="${_csrf.getToken()}">
-                        @endif
-                        <button type="submit">Salir</button>
-                    </form>
-                </div>
-            </div>
-        </header>
+        @template.fragment.barra(usuario = usuario, esAdmin = esAdmin, esSuperadmin = esSuperadmin, empresaNombre = empresaNombre, empresasMenu = empresasMenu, empresaActivaId = empresaActivaId, ruta = ruta, _csrf = _csrf)
         <main class="contenedor">
-            <h1>Carga rapida en grilla</h1>
+            <h1>Carga rápida</h1>
             @if (error != null)
                 <p class="error"><strong>${error}</strong></p>
             @endif
-            <p class="introduccion">Una fila por categoria, una fecha para todo el lote. Se cargan solo las celdas con numero. Traslados y cambios de categoria van por el formulario de alta, porque necesitan destino.</p>
+            <p class="introduccion">Una fila por categoría, una fecha para todo el lote. Se cargan solo las celdas con número. Traslados y cambios de categoría van por el formulario de alta, porque necesitan destino.</p>
             <form method="post" action="/grilla">
                 @if (_csrf != null)
                     <input type="hidden" name="${_csrf.getParameterName()}" value="${_csrf.getToken()}">
                 @endif
-                <p>
-                    <label>Fecha<br>
-                        <input type="date" name="fecha" value="${fecha.isEmpty() ? hoy : fecha}" required>
+                <div class="lote-cabecera">
+                    <label>Período
+                        <input type="month" name="periodo" value="${periodo}" aria-label="Período (mes y año)"
+                               hx-get="/campo-fecha" hx-target="#fecha" hx-swap="outerHTML" hx-trigger="change" hx-include="this">
                     </label>
-                </p>
-                <p>
-                    <label>Establecimiento<br>
+                    <label>Fecha
+                        @template.fragment.campoFecha(fecha = fecha.isEmpty() ? fechaPorDefecto : fecha)
+                    </label>
+                    <label>Establecimiento
                         <select name="establecimiento" required
                                 hx-get="/grilla/filas" hx-target="#filas" hx-include="closest form">
                             <option value=""></option>
@@ -70,22 +56,36 @@
                             @endfor
                         </select>
                     </label>
-                </p>
+                    <label title="Las filas de otras especies quedan ocultas, no se pierden: lo que escribas en ellas se guarda igual.">Especie
+                        <select name="especie"
+                                hx-get="/grilla/filas" hx-target="#filas" hx-include="closest form" hx-trigger="change">
+                            <option value="">Todas</option>
+                            <option value="VACUNOS" selected="${"VACUNOS".equals(especie)}">Vacunos</option>
+                            <option value="YEGUARIZOS" selected="${"YEGUARIZOS".equals(especie)}">Yeguarizos</option>
+                            <option value="LANARES" selected="${"LANARES".equals(especie)}">Lanares</option>
+                        </select>
+                    </label>
+                </div>
+                @if (!especie.isEmpty())
+                    <p class="ayuda">Las filas de otras especies quedan ocultas, no se pierden: si escribiste algo en ellas, se guarda igual.</p>
+                @endif
                 <div class="tabla-scroll">
                     <table class="grilla">
                         <thead>
                             <tr>
-                                <th>Categoria</th>
+                                <th>Categoría</th>
                                 <th>Compra</th>
                                 <th>Nacimiento</th>
                                 <th>Venta</th>
                                 <th>Mortandad</th>
                                 <th>Cueros</th>
                                 <th>Consumo</th>
+                                <th>Pastoreo</th>
+                                <th title="Cantidad contada. El sistema calcula la diferencia contra la existencia y la asienta sola.">Recuento</th>
                             </tr>
                         </thead>
                         <tbody id="filas">
-                            @template.fragment.filasGrilla(categorias = categorias, valores = valores)
+                            @template.fragment.filasGrilla(categorias = categorias, valores = valores, especie = especie)
                         </tbody>
                     </table>
                 </div>

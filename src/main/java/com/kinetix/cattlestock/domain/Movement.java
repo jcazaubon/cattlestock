@@ -85,6 +85,18 @@ public record Movement(
         return new Movement(id, d, MovementType.CONSUMO, est, cat, q, null, null, null, null);
     }
 
+    public static Movement pastoreo(String id, LocalDate d, String est, String cat, int q) {
+        return new Movement(id, d, MovementType.PASTOREO, est, cat, q, null, null, null, null);
+    }
+
+    public static Movement recuentoMas(String id, LocalDate d, String est, String cat, int q) {
+        return new Movement(id, d, MovementType.RECUENTO_MAS, est, cat, q, null, null, null, null);
+    }
+
+    public static Movement recuentoMenos(String id, LocalDate d, String est, String cat, int q) {
+        return new Movement(id, d, MovementType.RECUENTO_MENOS, est, cat, q, null, null, null, null);
+    }
+
     public static Movement cambioCategoria(String id, LocalDate d, String est, String from, String to, int q) {
         return new Movement(id, d, MovementType.CAMBIO_CATEGORIA, est, from, q, null, to, null, null);
     }
@@ -101,6 +113,9 @@ public record Movement(
             case VENTA -> List.of(new Effect(establishmentId, categoryId, date, Column.VENTA, quantity));
             case MORTANDAD -> List.of(new Effect(establishmentId, categoryId, date, Column.MORTANDAD, quantity));
             case CONSUMO -> List.of(new Effect(establishmentId, categoryId, date, Column.CONSUMO, quantity));
+            case PASTOREO -> List.of(new Effect(establishmentId, categoryId, date, Column.PASTOREO, quantity));
+            case RECUENTO_MAS -> List.of(new Effect(establishmentId, categoryId, date, Column.RECUENTO_MAS, quantity));
+            case RECUENTO_MENOS -> List.of(new Effect(establishmentId, categoryId, date, Column.RECUENTO_MENOS, quantity));
             case CAMBIO_CATEGORIA -> List.of(
                     new Effect(establishmentId, categoryId, date, Column.CAMBIO_SALE, quantity),
                     new Effect(establishmentId, destCategoryId, date, Column.CAMBIO_ENTRA, quantity));

@@ -1,10 +1,18 @@
 @param String error
+@param com.kinetix.cattlestock.web.AltaController.Disponible disponible
 @param String hoy
+@param String periodo
+@param String fechaPorDefecto
 @param String establecimiento
 @param String fecha
 @param String nota
 @param String usuario
 @param boolean esAdmin
+@param boolean esSuperadmin
+@param String empresaNombre
+@param java.util.List<com.kinetix.cattlestock.data.CompanyEntity> empresasMenu
+@param Long empresaActivaId
+@param String ruta
 @param org.springframework.security.web.csrf.CsrfToken _csrf
 @param java.util.List<com.kinetix.cattlestock.data.EstablishmentEntity> establecimientos
 @param java.util.List<com.kinetix.cattlestock.data.CategoryEntity> categorias
@@ -21,34 +29,10 @@
         <script src="/htmx.min.js"></script>
     </head>
     <body>
-        <header class="barra">
-            <a class="marca" href="/"><span class="caravana" aria-hidden="true"></span>CattleStock</a>
-            <nav hx-boost="true">
-                <a href="/grilla">Carga rapida</a>
-                <a href="/existencia">Existencia</a>
-            </nav>
-            <div class="menu-usuario">
-                <button type="button" class="usuario">
-                    <span class="avatar" aria-hidden="true">${usuario.length() > 0 ? usuario.substring(0, 1).toUpperCase() : "C"}</span>
-                    ${usuario}
-                </button>
-                <div class="menu-usuario-opciones">
-                    @if (esAdmin)
-                        <a href="/configuracion">Configuracion</a>
-                        <div class="separador"></div>
-                    @endif
-                    <form method="post" action="/logout" hx-boost="false">
-                        @if (_csrf != null)
-                            <input type="hidden" name="${_csrf.getParameterName()}" value="${_csrf.getToken()}">
-                        @endif
-                        <button type="submit">Salir</button>
-                    </form>
-                </div>
-            </div>
-        </header>
+        @template.fragment.barra(usuario = usuario, esAdmin = esAdmin, esSuperadmin = esSuperadmin, empresaNombre = empresaNombre, empresasMenu = empresasMenu, empresaActivaId = empresaActivaId, ruta = ruta, _csrf = _csrf)
         <main class="contenedor">
-            <h1>Cargar movimientos</h1>
-            <p class="introduccion">Una linea por movimiento, un solo guardado: el lote entra completo o no entra nada. Traslados y cambios de categoria llevan su destino en la misma linea, por partida doble.</p>
+            <h1>Cargar movimiento</h1>
+            <p class="introduccion">Una linea por movimiento, un solo guardado: el lote entra completo o no entra nada. Traslados y cambios de categoría llevan su destino en la misma linea, por partida doble.</p>
             @if (error != null)
                 <p class="error"><strong>${error}</strong></p>
             @endif
@@ -56,9 +40,14 @@
                 @if (_csrf != null)
                     <input type="hidden" name="${_csrf.getParameterName()}" value="${_csrf.getToken()}">
                 @endif
-                <div class="lote-cabecera">
+                <div class="lote-cabecera"
+                     hx-get="/alta/disponible" hx-trigger="change, fecha-actualizada from:body" hx-target="#disponible" hx-include="closest form" hx-swap="innerHTML">
+                    <label>Período
+                        <input type="month" name="periodo" value="${periodo}" aria-label="Período (mes y año)"
+                               hx-get="/campo-fecha" hx-target="#fecha" hx-swap="outerHTML" hx-trigger="change" hx-include="this">
+                    </label>
                     <label>Fecha
-                        <input type="date" name="fecha" value="${fecha.isEmpty() ? hoy : fecha}" required>
+                        @template.fragment.campoFecha(fecha = fecha.isEmpty() ? fechaPorDefecto : fecha)
                     </label>
                     <label>Establecimiento
                         <select name="establecimiento" required
@@ -70,19 +59,28 @@
                         </select>
                     </label>
                 </div>
+                <div id="disponible">
+                    @template.fragment.disponible(disponible = disponible)
+                </div>
                 <div id="lineas">
                     @template.fragment.lineas(lineas = lineas, categorias = categorias,
                             establecimientos = establecimientos, establecimiento = establecimiento,
                             destinoCategoriasPorIndice = destinoCategoriasPorIndice)
                 </div>
+                <div class="agregar-linea">
+                    <button type="button" class="boton boton-linea"
+                            hx-get="/alta/linea" hx-target="#lineas" hx-swap="beforeend" hx-include="closest form">
+                        Agregar otro movimiento
+                    </button>
+                    <span class="ayuda">Todos los movimientos del lote se guardan juntos: entran todos o no entra ninguno.</span>
+                </div>
+                @if (esAdmin)
+                    <p class="ayuda">Si falta una categoría, agregalá en <a href="/configuracion${establecimiento.isEmpty() ? "" : "?establecimiento=" + establecimiento}">Configuración</a>.</p>
+                @endif
                 <div class="lote-pie">
                     <label class="nota-lote">Nota del lote
                         <input type="text" name="nota" value="${nota}">
                     </label>
-                    <button type="button" class="boton boton-linea"
-                            hx-get="/alta/linea" hx-target="#lineas" hx-swap="beforeend" hx-include="closest form">
-                        Agregar linea
-                    </button>
                     <button type="submit" class="boton">Guardar lote</button>
                 </div>
             </form>

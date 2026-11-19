@@ -4,7 +4,7 @@
 @param String establecimiento
 @param java.util.List<com.kinetix.cattlestock.data.CategoryEntity> destinoCategorias
 <div class="linea" id="linea-${linea.indice()}">
-    <label>Categoria
+    <label>Categoría
         <select name="categoria${linea.indice()}">
             <option value=""></option>
             @for (var c : categorias)
@@ -22,8 +22,11 @@
             <option value="NACIMIENTO" selected="${"NACIMIENTO".equals(linea.tipo())}">Nacimiento o produccion</option>
             <option value="MORTANDAD" selected="${"MORTANDAD".equals(linea.tipo())}">Mortandad</option>
             <option value="CONSUMO" selected="${"CONSUMO".equals(linea.tipo())}">Consumo</option>
+            <option value="PASTOREO" selected="${"PASTOREO".equals(linea.tipo())}">Pastoreo</option>
+            <option value="RECUENTO_MAS" selected="${"RECUENTO_MAS".equals(linea.tipo())}">Diferencia de recuento (sobran)</option>
+            <option value="RECUENTO_MENOS" selected="${"RECUENTO_MENOS".equals(linea.tipo())}">Diferencia de recuento (faltan)</option>
             <option value="TRASLADO" selected="${"TRASLADO".equals(linea.tipo())}">Traslado</option>
-            <option value="CAMBIO_CATEGORIA" selected="${"CAMBIO_CATEGORIA".equals(linea.tipo())}">Cambio de categoria</option>
+            <option value="CAMBIO_CATEGORIA" selected="${"CAMBIO_CATEGORIA".equals(linea.tipo())}">Cambio de categoría</option>
         </select>
     </label>
     <label class="campo-corto">Cantidad

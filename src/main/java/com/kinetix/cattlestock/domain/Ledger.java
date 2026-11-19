@@ -155,6 +155,50 @@ public final class Ledger {
         return total;
     }
 
+    /**
+     * Existencia a una fecha con el movimiento del mes hasta esa fecha, desglosado por columna de la planilla:
+     * inicio + entradas - salidas = existencia.
+     */
+    public record ExistenceDetail(Establishment establishment, Category category, int inicio,
+                                  Map<Column, Integer> columns, int quantity) {
+        public int entradas() {
+            return sum(true);
+        }
+
+        public int salidas() {
+            return sum(false);
+        }
+
+        private int sum(boolean entrada) {
+            int total = 0;
+            for (Map.Entry<Column, Integer> e : columns.entrySet()) {
+                if (e.getKey().entrada == entrada) total += e.getValue();
+            }
+            return total;
+        }
+    }
+
+    public List<ExistenceDetail> existenciaDetallada(LocalDate asOf, String establishmentId, Species species,
+                                                     String categoryId) {
+        LocalDate primero = asOf.withDayOfMonth(1);
+        List<ExistenceDetail> out = new ArrayList<>();
+        for (ExistenceRow row : existencia(asOf, establishmentId, species, categoryId)) {
+            String k = key(row.establishment().id(), row.category().id());
+            Map<Column, Integer> columnas = new EnumMap<>(Column.class);
+            for (Column c : Column.values()) columnas.put(c, 0);
+            for (Movement m : movements) {
+                for (Effect e : m.effects()) {
+                    if (!e.key().equals(k) || e.date().isBefore(primero) || e.date().isAfter(asOf)) continue;
+                    columnas.merge(e.column(), e.quantity(), Integer::sum);
+                }
+            }
+            ExistenceDetail parcial = new ExistenceDetail(row.establishment(), row.category(), 0, columnas, 0);
+            out.add(new ExistenceDetail(row.establishment(), row.category(),
+                    row.quantity() - parcial.entradas() + parcial.salidas(), columnas, row.quantity()));
+        }
+        return out;
+    }
+
     /** Vista general de existencia a una fecha. Los filtros en null no filtran. */
     public List<ExistenceRow> existencia(LocalDate asOf, String establishmentId, Species species, String categoryId) {
         List<ExistenceRow> out = new ArrayList<>();

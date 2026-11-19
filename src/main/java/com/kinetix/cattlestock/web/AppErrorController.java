@@ -29,7 +29,7 @@ public class AppErrorController implements ErrorController {
         });
         model.addAttribute("detalle", switch (codigo) {
             case 400 -> "Falto completar un campo o algun dato vino mal. Volve al formulario y revisa.";
-            case 403 -> "No tenes permiso para eso, o la sesion expiro. Inicia sesion de nuevo.";
+            case 403 -> "No tenés permiso para eso, o la sesion expiro. Inicia sesion de nuevo.";
             case 404 -> "Esa direccion no existe o se movio de lugar.";
             case 405 -> "Esa direccion no acepta ese metodo: por ejemplo, entrar con GET a algo que espera POST.";
             default -> "Ocurrio un error inesperado. Quedo registrado en la consola del servidor.";

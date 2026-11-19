@@ -41,15 +41,15 @@ class PlanillaExcelExporterTest {
             Row toros = filaCon(hoja, "Toros");
             assertEquals(51, toros.getCell(1).getNumericCellValue(), "anterior");
             assertEquals(10, toros.getCell(2).getNumericCellValue(), "compra");
-            assertEquals(10, toros.getCell(11).getNumericCellValue(), "entradas");
-            assertEquals(61, toros.getCell(13).getNumericCellValue(), "final");
+            assertEquals(10, toros.getCell(14).getNumericCellValue(), "entradas");
+            assertEquals(61, toros.getCell(16).getNumericCellValue(), "final");
 
             Row totalVacunos = filaCon(hoja, "Total Vacunos");
-            assertEquals(61, totalVacunos.getCell(13).getNumericCellValue(), "final vacunos");
+            assertEquals(61, totalVacunos.getCell(16).getNumericCellValue(), "final vacunos");
 
             Row totalGeneral = filaCon(hoja, "Total general");
             assertEquals(109, totalGeneral.getCell(1).getNumericCellValue(), "anterior general");
-            assertEquals(119, totalGeneral.getCell(13).getNumericCellValue(), "final general");
+            assertEquals(119, totalGeneral.getCell(16).getNumericCellValue(), "final general");
         }
     }
 

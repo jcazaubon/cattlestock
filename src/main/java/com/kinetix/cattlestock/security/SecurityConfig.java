@@ -12,7 +12,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import com.kinetix.cattlestock.data.UserRepository;
 
 /**
- * Login propio, todo autenticado. Configuracion solo para administradores.
+ * Login propio, todo autenticado. Configuracion para administradores de empresa y superadmin; /admin solo para el superadmin.
  * El usuario de rol CARGA solo ve y carga en sus establecimientos (se controla en los controllers).
  */
 @Configuration
@@ -32,7 +32,9 @@ public class SecurityConfig {
                         .requestMatchers("/app.css").permitAll()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/configuracion/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/**").hasRole("SUPERADMIN")
+                        .requestMatchers("/historial/**").hasAnyRole("ADMIN", "SUPERADMIN")
+                        .requestMatchers("/configuracion/**").hasAnyRole("ADMIN", "SUPERADMIN")
                         .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/login")

@@ -6,21 +6,22 @@ import java.util.List;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import com.kinetix.cattlestock.app.LedgerService;
 import com.kinetix.cattlestock.app.UserService;
-import com.kinetix.cattlestock.data.CompanyEntity;
 import com.kinetix.cattlestock.data.CompanyRepository;
 import com.kinetix.cattlestock.data.UserEntity;
 import com.kinetix.cattlestock.data.UserRepository;
 import com.kinetix.cattlestock.domain.Species;
 
 /**
- * Datos de prueba para arrancar la app: empresa, establecimientos, stock inicial y el
- * usuario admin (admin/admin). Corre una sola vez, si la empresa no esta configurada.
+ * Datos de prueba para arrancar la app: la empresa Prueba, sus establecimientos, el stock inicial y el
+ * superadmin (admin/admin). Corre una sola vez, si la empresa no esta configurada.
  */
 @Component
+@Order(10)
 @ConditionalOnProperty(name = "cattlestock.seed", havingValue = "true", matchIfMissing = true)
 public class Seed implements ApplicationRunner {
 
@@ -41,24 +42,24 @@ public class Seed implements ApplicationRunner {
         // El usuario admin se garantiza siempre: si la base venia de una version
         // sin usuarios, hay que poder entrar.
         if (users.count() == 0) {
-            userService.crear("admin", "admin", UserEntity.Role.ADMIN, List.of());
+            userService.crearSuperadmin("admin", "admin");
         }
-        if (companies.findById(CompanyEntity.ID).isPresent()) {
+        if (!companies.findAll().isEmpty()) {
             return;
         }
         YearMonth inicio = YearMonth.now();
-        service.configureCompany("Ganadera de prueba", inicio);
-        service.createEstablishment("P", "Principal");
-        service.createCategory("P", "toros", "Toros", Species.VACUNOS);
-        service.createCategory("P", "vplantel", "Vacas Plantel", Species.VACUNOS);
-        service.createCategory("P", "vgeneral", "Vacas General", Species.VACUNOS);
-        service.createCategory("P", "vaqplantel", "Vaquillonas Cria Plantel", Species.VACUNOS);
-        service.createCategory("P", "orejanos", "Terneros Orejanos", Species.VACUNOS);
-        service.createCategory("P", "vengorde", "Vacas en Engorde", Species.VACUNOS);
-        service.createCategory("P", "toroseng", "Toros Engorde", Species.VACUNOS);
-        service.createCategory("P", "yeguarizos", "Yeguarizos", Species.YEGUARIZOS);
-        service.createEstablishment("LM", "La Marta");
-        service.createCategory("LM", "vacas", "Vacas", Species.VACUNOS);
+        Long empresa = service.createCompany("Prueba", inicio);
+        service.createEstablishment(empresa, "P", "Principal");
+        service.createCategory(empresa, "toros", "Toros", Species.VACUNOS);
+        service.createCategory(empresa, "vplantel", "Vacas Plantel", Species.VACUNOS);
+        service.createCategory(empresa, "vgeneral", "Vacas General", Species.VACUNOS);
+        service.createCategory(empresa, "vaqplantel", "Vaquillonas Cria Plantel", Species.VACUNOS);
+        service.createCategory(empresa, "orejanos", "Terneros Orejanos", Species.VACUNOS);
+        service.createCategory(empresa, "vengorde", "Vacas en Engorde", Species.VACUNOS);
+        service.createCategory(empresa, "toroseng", "Toros Engorde", Species.VACUNOS);
+        service.createCategory(empresa, "yeguarizos", "Yeguarizos", Species.YEGUARIZOS);
+        service.createEstablishment(empresa, "LM", "La Marta");
+        service.createCategory(empresa, "vacas", "Vacas", Species.VACUNOS);
 
         service.setOpening("P", "toros", 51);
         service.setOpening("P", "vplantel", 37);

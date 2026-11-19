@@ -18,7 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
  */
 @SpringBootTest
 @AutoConfigureMockMvc
-@WithMockUser(username = "admin", roles = "ADMIN")
+@WithMockUser(username = "admin", roles = "SUPERADMIN")
 class JteSmokeTest {
 
     @Autowired

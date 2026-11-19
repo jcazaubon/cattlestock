@@ -244,6 +244,25 @@ class LedgerTest {
     }
 
     @Test
+    @DisplayName("pastoreo y diferencias de recuento mueven la existencia y tienen su propia columna")
+    void pastoreoYRecuentoTienenColumnaPropia() {
+        Ledger l = escenario();
+        l.addAll(List.of(
+                Movement.pastoreo("p1", sep(3), "P", "vgeneral", 100),
+                Movement.recuentoMas("r1", sep(4), "P", "toros", 3),
+                Movement.recuentoMenos("r2", sep(4), "P", "orejanos", 8)));
+        Planilla p = l.planilla("P", SEP);
+        eq(558, fila(p, "vgeneral").finalStock(), "Vacas General tras pastoreo");
+        eq(100, fila(p, "vgeneral").columns().get(Column.PASTOREO), "columna pastoreo");
+        eq(54, fila(p, "toros").finalStock(), "Toros con recuento a favor");
+        eq(3, fila(p, "toros").columns().get(Column.RECUENTO_MAS), "columna recuento +");
+        eq(810, fila(p, "orejanos").finalStock(), "Orejanos con recuento en contra");
+        eq(8, fila(p, "orejanos").columns().get(Column.RECUENTO_MENOS), "columna recuento -");
+        rejects("Stock insuficiente", () ->
+                l.add(Movement.pastoreo("p2", sep(5), "P", "toros", 500)));
+    }
+
+    @Test
     @DisplayName("la vista general filtra por establecimiento, especie y categoria")
     void laVistaGeneralFiltra() {
         Ledger l = escenario();
