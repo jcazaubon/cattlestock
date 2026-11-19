@@ -232,7 +232,7 @@ class WebTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Stock insuficiente")))
                 .andExpect(content().string(containsString("value=\"10\"")))
-                .andExpect(content().string(containsString("Carga rápida")));
+                .andExpect(content().string(containsString("Cargar movimientos")));
         org.junit.jupiter.api.Assertions.assertEquals(0, movements.count());
     }
 

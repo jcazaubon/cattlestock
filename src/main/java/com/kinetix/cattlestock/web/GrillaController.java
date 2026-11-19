@@ -81,7 +81,7 @@ public class GrillaController {
                          @RequestParam Map<String, String> valores,
                          jakarta.servlet.http.HttpSession sesion) {
         try {
-            LocalDate d = parseFecha(texto(fecha, "Elegí la fecha"));
+            LocalDate d = CargaComun.parseFecha(CargaComun.texto(fecha, "Elegí la fecha"));
             if (!currentUser.puedeAcceder(establecimiento)) {
                 throw new IllegalArgumentException("No podés cargar en " + establecimiento);
             }
@@ -158,19 +158,6 @@ public class GrillaController {
         }
         if (n < 0) throw new IllegalArgumentException("Las cantidades no pueden ser negativas");
         return n;
-    }
-
-    private LocalDate parseFecha(String fecha) {
-        try {
-            return LocalDate.parse(fecha);
-        } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("La fecha no es válida");
-        }
-    }
-
-    private String texto(String valor, String mensajeSiFalta) {
-        if (valor == null || valor.isBlank()) throw new IllegalArgumentException(mensajeSiFalta);
-        return valor.trim();
     }
 
     private List<CategoryEntity> categoriasVisibles(String establecimiento) {

@@ -22,7 +22,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Carga rápida - CattleStock</title>
+        <title>Cargar movimientos - CattleStock</title>
         <link rel="stylesheet" href="/app.css">
         <meta name="htmx-config" content='{"globalViewTransitions":true}'>
         <script src="/htmx.min.js"></script>
@@ -30,11 +30,12 @@
     <body>
         @template.fragment.barra(usuario = usuario, esAdmin = esAdmin, esSuperadmin = esSuperadmin, empresaNombre = empresaNombre, empresasMenu = empresasMenu, empresaActivaId = empresaActivaId, ruta = ruta, _csrf = _csrf)
         <main class="contenedor">
-            <h1>Carga rápida</h1>
+            <h1>Cargar movimientos</h1>
+            @template.fragment.pestanasCarga(activa = "planilla")
             @if (error != null)
                 <p class="error"><strong>${error}</strong></p>
             @endif
-            <p class="introduccion">Una fila por categoría, una fecha para todo el lote. Se cargan solo las celdas con número. Traslados y cambios de categoría van por el formulario de alta, porque necesitan destino.</p>
+            <p class="introduccion">Una fila por categoría, una fecha para todo el lote. Se cargan solo las celdas con número. Traslados y cambios de categoría van por la carga por línea, porque necesitan destino.</p>
             <form method="post" action="/grilla">
                 @if (_csrf != null)
                     <input type="hidden" name="${_csrf.getParameterName()}" value="${_csrf.getToken()}">

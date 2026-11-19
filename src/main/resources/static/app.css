@@ -690,3 +690,9 @@ h2.especie { margin: 1.6rem 0 .3rem; font-size: 1.1rem; }
 
 .planilla tbody td:is(:nth-child(n+3):nth-child(-n+7), :nth-child(15)):not(.cero) { color: var(--verde); }
 .planilla tbody td:is(:nth-child(n+8):nth-child(-n+14), :nth-child(16)):not(.cero) { color: var(--rojo); }
+
+/* Formas de carga: pestañas con el indicador subrayado */
+.pestanas { display: flex; gap: 1.4rem; margin: 0 0 1rem; border-bottom: 1px solid var(--borde); }
+.pestanas a { padding: .5rem .1rem; color: var(--tinta-2); text-decoration: none; font-weight: 500; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.pestanas a:hover { color: var(--tinta); }
+.pestanas a[aria-current="page"] { color: var(--tinta); border-bottom-color: var(--acento); font-weight: 600; }

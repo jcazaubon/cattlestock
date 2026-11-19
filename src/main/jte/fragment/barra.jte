@@ -10,8 +10,7 @@
     <a class="marca" href="/"><span class="caravana" aria-hidden="true"></span>CattleStock</a>
     <nav hx-boost="true" aria-label="Principal">
         <a href="/" aria-current="${ruta.equals("/") || ruta.startsWith("/planilla") ? "page" : null}">Planillas</a>
-        <a href="/alta" aria-current="${ruta.startsWith("/alta") ? "page" : null}">Cargar movimiento</a>
-        <a href="/grilla" aria-current="${ruta.startsWith("/grilla") ? "page" : null}">Carga rápida</a>
+        <a href="/grilla" aria-current="${ruta.startsWith("/alta") || ruta.startsWith("/grilla") ? "page" : null}">Cargar movimientos</a>
         <a href="/existencia" aria-current="${ruta.startsWith("/existencia") ? "page" : null}">Existencia</a>
         @if (esAdmin)
             <a href="/historial" aria-current="${ruta.startsWith("/historial") ? "page" : null}">Historial</a>
@@ -73,3 +72,4 @@
 <script src="/confirmar.js" defer></script>
 <script src="/menus.js" defer></script>
 <script src="/periodo.js" defer></script>
+<script src="/pestanas.js" defer></script>

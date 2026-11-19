@@ -31,7 +31,8 @@
     <body>
         @template.fragment.barra(usuario = usuario, esAdmin = esAdmin, esSuperadmin = esSuperadmin, empresaNombre = empresaNombre, empresasMenu = empresasMenu, empresaActivaId = empresaActivaId, ruta = ruta, _csrf = _csrf)
         <main class="contenedor">
-            <h1>Cargar movimiento</h1>
+            <h1>Cargar movimientos</h1>
+            @template.fragment.pestanasCarga(activa = "linea")
             <p class="introduccion">Una linea por movimiento, un solo guardado: el lote entra completo o no entra nada. Traslados y cambios de categoría llevan su destino en la misma linea, por partida doble.</p>
             @if (error != null)
                 <p class="error"><strong>${error}</strong></p>

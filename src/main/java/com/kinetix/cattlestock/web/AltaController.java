@@ -140,8 +140,8 @@ public class AltaController {
     public String registrar(Model model, @RequestParam(required = false) Map<String, String> params,
                             jakarta.servlet.http.HttpSession sesion) {
         try {
-            LocalDate d = parseFecha(texto(params.get("fecha"), "Elegí la fecha"));
-            String est = texto(params.get("establecimiento"), "Elegí el establecimiento");
+            LocalDate d = CargaComun.parseFecha(CargaComun.texto(params.get("fecha"), "Elegí la fecha"));
+            String est = CargaComun.texto(params.get("establecimiento"), "Elegí el establecimiento");
             if (!currentUser.puedeAcceder(est)) {
                 throw new IllegalArgumentException("No podés cargar en " + est);
             }
@@ -169,16 +169,16 @@ public class AltaController {
     // --- Helpers ---
 
     private Movement construir(LocalDate fecha, String establecimiento, LineaForm linea, String nota) {
-        String cat = texto(linea.categoria(), "Elegí la categoria");
+        String cat = CargaComun.texto(linea.categoria(), "Elegí la categoria");
         MovementType t;
         try {
-            t = MovementType.valueOf(texto(linea.tipo(), "Elegí el tipo"));
+            t = MovementType.valueOf(CargaComun.texto(linea.tipo(), "Elegí el tipo"));
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("El tipo no es valido");
         }
         int q;
         try {
-            q = Integer.parseInt(texto(linea.cantidad(), "Escribi la cantidad").trim());
+            q = Integer.parseInt(CargaComun.texto(linea.cantidad(), "Escribi la cantidad").trim());
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("La cantidad debe ser un numero entero");
         }
@@ -188,10 +188,10 @@ public class AltaController {
         Integer cueros = null;
         switch (t) {
             case MORTANDAD -> cueros = cuerosDe(linea.cueros());
-            case CAMBIO_CATEGORIA -> destinoCategoria = texto(linea.destinoCategoria(), "Elegí la categoria destino");
+            case CAMBIO_CATEGORIA -> destinoCategoria = CargaComun.texto(linea.destinoCategoria(), "Elegí la categoria destino");
             case TRASLADO -> {
-                destinoEstablecimiento = texto(linea.destinoEstablecimiento(), "Elegí el establecimiento destino");
-                destinoCategoria = texto(linea.destinoCategoria(), "Elegí la categoria destino");
+                destinoEstablecimiento = CargaComun.texto(linea.destinoEstablecimiento(), "Elegí el establecimiento destino");
+                destinoCategoria = CargaComun.texto(linea.destinoCategoria(), "Elegí la categoria destino");
             }
             default -> { }
         }
@@ -209,19 +209,6 @@ public class AltaController {
 
     private static String notaDe(String nota) {
         return nota == null || nota.isBlank() ? null : nota.trim();
-    }
-
-    private LocalDate parseFecha(String fecha) {
-        try {
-            return LocalDate.parse(fecha);
-        } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("La fecha no es válida");
-        }
-    }
-
-    private String texto(String valor, String mensajeSiFalta) {
-        if (valor == null || valor.isBlank()) throw new IllegalArgumentException(mensajeSiFalta);
-        return valor.trim();
     }
 
     private static List<Integer> indicesDeLinea(Map<String, String> params) {
