@@ -25,6 +25,12 @@ import com.kinetix.cattlestock.domain.Species;
 @ConditionalOnProperty(name = "cattlestock.seed", havingValue = "true", matchIfMissing = true)
 public class Seed implements ApplicationRunner {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Seed.class);
+
+    /** La clave del superadmin inicial. En produccion se define por variable de entorno; nunca queda en el codigo. */
+    @org.springframework.beans.factory.annotation.Value("${cattlestock.admin-password:admin}")
+    private String adminPassword;
+
     private final LedgerService service;
     private final UserService userService;
     private final CompanyRepository companies;
@@ -42,7 +48,11 @@ public class Seed implements ApplicationRunner {
         // El usuario admin se garantiza siempre: si la base venia de una version
         // sin usuarios, hay que poder entrar.
         if (users.count() == 0) {
-            userService.crearSuperadmin("admin", "admin");
+            userService.crearSuperadmin("admin", adminPassword);
+            if ("admin".equals(adminPassword)) {
+                LOG.warn("Se creo el superadmin 'admin' con la clave por defecto. Antes de publicar el sistema "
+                        + "definir cattlestock.admin-password (variable CATTLESTOCK_ADMIN_PASSWORD) o cambiarla.");
+            }
         }
         if (!companies.findAll().isEmpty()) {
             return;

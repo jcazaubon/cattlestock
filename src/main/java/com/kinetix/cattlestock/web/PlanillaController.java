@@ -172,6 +172,9 @@ public class PlanillaController {
             if (!currentUser.esAdmin()) {
                 throw new DomainException("Solo un administrador puede reabrir una planilla.");
             }
+            if (!currentUser.puedeAcceder(establecimiento)) {
+                throw new DomainException("No tenés acceso a ese establecimiento.");
+            }
             service.reopenLastMonth(establecimiento);
         });
     }

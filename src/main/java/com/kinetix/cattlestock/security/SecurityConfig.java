@@ -31,7 +31,7 @@ public class SecurityConfig {
                         .requestMatchers("/htmx.min.js").permitAll()
                         .requestMatchers("/app.css").permitAll()
                         .requestMatchers("/error").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/h2-console/**").hasRole("SUPERADMIN")
                         .requestMatchers("/admin/**").hasRole("SUPERADMIN")
                         .requestMatchers("/historial/**").hasAnyRole("ADMIN", "SUPERADMIN")
                         .requestMatchers("/configuracion/**").hasAnyRole("ADMIN", "SUPERADMIN")
