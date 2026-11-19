@@ -34,7 +34,74 @@ Lo marcado como hecho ya está en el código; el resto son tareas del deploy.
    a una base compartida (por ejemplo, Spring Session con la base de datos).
 9. **Registros (logs).** No registran contraseñas ni datos personales; revisar que el servidor tampoco los guarde en el proxy.
 10. **Subida de Excel.** Tope de 25 MB y solo administradores. Si se abre a más usuarios, bajar el tope y evaluar un escaneo del archivo.
-11. **Dependencias.** Correr un análisis de vulnerabilidades (por ejemplo OWASP Dependency-Check) antes de cada publicación y mantener Spring Boot al día.
+11. **Dependencias.** Antes de cada publicación: actualizar al último parche de Spring Boot 4.1.x (arrastra Tomcat, Spring Security, Hibernate y Jackson) y
+    correr un análisis de vulnerabilidades (por ejemplo OWASP Dependency-Check). La última revisión (19/11/2026) dejó Spring Boot 4.1.3 con Tomcat 11.0.27, que cierra los
+    CVE de Tomcat publicados hasta ese día; la versión 4.1.1 traía Tomcat 11.0.24, con varias fallas conocidas. Los avisos de Tomcat están en
+    <https://tomcat.apache.org/security-11.html>.
+
+## Oracle Cloud: VM Ampere A1 (ARM), plan Always Free
+
+Plan elegido para la primera prueba. Una sola máquina corre la aplicación, MariaDB y el proxy con HTTPS.
+Los números de capacidad del plan hay que confirmarlos en la consola de Oracle, porque cambian.
+
+**Máquina.** Forma `VM.Standard.A1.Flex`, Ubuntu para ARM (aarch64). Con 1 núcleo y 6 GB alcanza de sobra; no hace falta pedir más.
+Si la región no tiene capacidad, probar otro dominio de disponibilidad o reintentar más tarde.
+
+**Memoria.** Con 6 GB sobra margen. Valores de partida:
+
+- Aplicación: `-Xms256m -Xmx768m` (subir solo si la observación bajo carga lo pide).
+- MariaDB: `innodb_buffer_pool_size=256M`.
+- Base: `spring.datasource.hikari.maximum-pool-size=5`.
+
+**Java.** Usar un JDK 25 para aarch64 (Temurin u otro) y comprobar con `java -version` que sea de ARM. El `.jar` es el mismo que se arma en
+Windows (Java es portable): se genera con `./mvnw.cmd -DskipTests package` y se copia a la VM. Antes hay que resolver la tarea 5 (plantillas precompiladas).
+
+**Pasos.**
+
+1. Crear la VM y una clave SSH. En la red virtual (VCN), lista de seguridad: abrir 80 y 443; **no** abrir 8080 ni 3306.
+2. Abrir también el firewall de la propia máquina (`iptables` en las imágenes de Oracle): puertos 80 y 443. Es el olvido más común.
+3. Instalar MariaDB con `apt`, que escuche solo en `127.0.0.1`, y crear una base y un usuario propios (con clave larga y aleatoria, no `cattlestock`).
+4. Crear el usuario del sistema `cattlestock` y la carpeta `/opt/cattlestock` con el `.jar`.
+5. Guardar los secretos en `/etc/cattlestock.env` (permisos `600`, dueño `root`):
+
+   ```
+   SPRING_DATASOURCE_URL=jdbc:mariadb://127.0.0.1:3306/cattlestock
+   SPRING_DATASOURCE_USERNAME=cattlestock
+   SPRING_DATASOURCE_PASSWORD=<clave larga>
+   CATTLESTOCK_ADMIN_PASSWORD=<clave del superadmin>
+   SERVER_ADDRESS=127.0.0.1
+   SERVER_PORT=8080
+   SERVER_SERVLET_SESSION_COOKIE_SECURE=true
+   SERVER_FORWARD_HEADERS_STRATEGY=native
+   ```
+
+6. Servicio `systemd` (`/etc/systemd/system/cattlestock.service`), para que arranque solo y se reinicie si cae:
+
+   ```
+   [Unit]
+   Description=CattleStock
+   After=network.target mariadb.service
+
+   [Service]
+   User=cattlestock
+   EnvironmentFile=/etc/cattlestock.env
+   ExecStart=/usr/bin/java -Xms256m -Xmx768m -jar /opt/cattlestock/cattlestock.jar
+   Restart=on-failure
+
+   [Install]
+   WantedBy=multi-user.target
+   ```
+
+7. Proxy con HTTPS: Caddy (certificado de Let's Encrypt automático) que reenvía a `127.0.0.1:8080`. Hace falta un nombre de dominio apuntando
+   a la IP pública de la VM. Sin dominio no hay certificado válido: para probar se puede entrar por un túnel SSH.
+8. Respaldo: `mysqldump` diario con `cron`, comprimido, copiado fuera de la VM (Object Storage de Oracle u otro lado). Probar una restauración.
+9. Primer ingreso: entrar como superadmin, cambiar la clave si quedó la inicial, crear la empresa y su administrador (que deberá cambiar su clave temporal).
+
+**Cuidados propios de Oracle.**
+
+- Oracle puede reclamar las instancias gratuitas que pasan mucho tiempo casi inactivas: revisar la política vigente y no depender de la VM sin respaldos.
+- Las claves y la clave SSH se guardan fuera del repositorio; nada de esto se commitea.
+- Con una sola VM no hay alta disponibilidad: si cae, el sistema queda caído hasta que se reinicie.
 
 ## Pendiente a futuro
 

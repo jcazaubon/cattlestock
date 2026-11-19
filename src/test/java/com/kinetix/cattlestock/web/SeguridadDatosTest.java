@@ -124,4 +124,18 @@ class SeguridadDatosTest {
                 .andExpect(header().string("Content-Security-Policy", containsString("object-src 'none'")))
                 .andExpect(header().string("Referrer-Policy", containsString("strict-origin-when-cross-origin")));
     }
+
+    @Test
+    void lasRedireccionesNoDejanQueUnParametroAgregueOtros() throws Exception {
+        configurar();
+        for (String ruta : List.of("/planilla/excel", "/planilla/pdf")) {
+            mockMvc.perform(get(ruta).with(user("adminnorte").roles("ADMIN"))
+                            .param("establecimiento", "S1&error=hola").param("mes", "2026-09&x=1"))
+                    .andExpect(header().string("Location", containsString("establecimiento=S1%26error%3Dhola")))
+                    .andExpect(header().string("Location", containsString("mes=2026-09%26x%3D1")));
+        }
+        mockMvc.perform(post("/planilla/cerrar").with(user("adminnorte").roles("ADMIN")).with(csrf())
+                        .param("establecimiento", "S1&error=hola").param("mes", "2026-09"))
+                .andExpect(header().string("Location", containsString("establecimiento=S1%26error%3Dhola")));
+    }
 }

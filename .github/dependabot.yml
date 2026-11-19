@@ -1,0 +1,16 @@
+# GitHub abre solo un pedido de cambio cuando una dependencia tiene una version nueva o una falla de seguridad.
+version: 2
+updates:
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      # Spring Boot arrastra Tomcat, Spring Security, Hibernate y Jackson: se actualizan juntos
+      spring-boot:
+        patterns:
+          - "org.springframework*"
+          - "org.apache.tomcat*"
+          - "org.hibernate*"
+          - "tools.jackson*"

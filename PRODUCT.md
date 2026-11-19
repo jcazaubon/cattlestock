@@ -77,7 +77,7 @@ La instalación tiene varias empresas independientes: cada una con sus estableci
 
 ## Estado actual
 
-Funciona y está verificado (198 pruebas con `./mvnw test`, atajos `./verify` y `verify.cmd`). Los diez criterios del primer resultado útil están hechos.
+Funciona y está verificado (199 pruebas con `./mvnw test`, atajos `./verify` y `verify.cmd`). Los diez criterios del primer resultado útil están hechos.
 
 - Dominio puro (`com.kinetix.cattlestock.domain`): libro de movimientos con los diez tipos, stock negativo revisado por día, planilla mensual por establecimiento con totales por especie, traslados y cambios de categoría de dos lados, cierres en orden.
 - Persistencia JPA (`data`): empresa, establecimientos, categorías, stock inicial, movimientos, cierres y usuarios. El stock se calcula, no se guarda.

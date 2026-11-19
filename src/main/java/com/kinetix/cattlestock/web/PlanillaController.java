@@ -77,7 +77,7 @@ public class PlanillaController {
     @GetMapping("/planilla/excel")
     public void excel(@RequestParam String establecimiento, @RequestParam String mes,
                       HttpServletResponse response) throws IOException {
-        String volver = "/planilla?establecimiento=" + establecimiento + "&mes=" + mes;
+        String volver = rutaPlanilla(establecimiento, mes);
         if (!currentUser.puedeAcceder(establecimiento)) {
             response.sendRedirect(volver + "&error=" + URLEncoder.encode("No tenés acceso a ese establecimiento.",
                     StandardCharsets.UTF_8));
@@ -99,7 +99,7 @@ public class PlanillaController {
     @GetMapping("/planilla/pdf")
     public void pdf(@RequestParam String establecimiento, @RequestParam String mes,
                     HttpServletResponse response) throws IOException {
-        String volver = "/planilla?establecimiento=" + establecimiento + "&mes=" + mes;
+        String volver = rutaPlanilla(establecimiento, mes);
         if (!currentUser.puedeAcceder(establecimiento)) {
             response.sendRedirect(volver + "&error=" + URLEncoder.encode("No tenés acceso a ese establecimiento.",
                     StandardCharsets.UTF_8));
@@ -179,6 +179,12 @@ public class PlanillaController {
         });
     }
 
+    /** La planilla a la que se vuelve; los parametros se codifican para que no puedan agregar otros. */
+    private static String rutaPlanilla(String establecimiento, String mes) {
+        return "/planilla?establecimiento=" + URLEncoder.encode(String.valueOf(establecimiento), StandardCharsets.UTF_8)
+                + "&mes=" + URLEncoder.encode(String.valueOf(mes), StandardCharsets.UTF_8);
+    }
+
     private interface Accion {
         void run();
     }
@@ -190,7 +196,7 @@ public class PlanillaController {
         } catch (DomainException | DateTimeParseException e) {
             error = e.getMessage();
         }
-        return "redirect:/planilla?establecimiento=" + establecimiento + "&mes=" + mes
+        return "redirect:" + rutaPlanilla(establecimiento, mes)
                 + (error != null ? "&error=" + URLEncoder.encode(error, StandardCharsets.UTF_8) : "");
     }
 }
